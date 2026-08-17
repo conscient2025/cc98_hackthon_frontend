@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>CC98 AI+</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; width:280px; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; color:#1f2937; }
+    .head { background:#3b82f6; color:#fff; padding:14px 16px; }
+    .head h1 { margin:0; font-size:15px; }
+    .head p { margin:2px 0 0; font-size:11px; opacity:.85; }
+    .body { padding:14px 16px; }
+    .row { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:6px 0; }
+    .row .k { color:#6b7280; }
+    .row .v { font-weight:600; }
+    .row .v.ok { color:#065f46; }
+    .row .v.no { color:#92400e; }
+    .btns { display:flex; gap:8px; margin-top:12px; }
+    button { flex:1; border:none; border-radius:8px; padding:9px 0; font-size:12px; font-weight:600; cursor:pointer; }
+    .primary { background:#3b82f6; color:#fff; }
+    .primary:hover { background:#2563eb; }
+    .ghost { background:#f3f4f6; color:#1f2937; border:1px solid #e5e7eb; }
+    .ghost:hover { background:#e5e7eb; }
+    .tip { margin-top:12px; font-size:11px; color:#6b7280; line-height:1.5; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <h1>🤖 CC98 AI+</h1>
+    <p>AI 搜索总结 · 订阅新帖提醒</p>
+  </div>
+  <div class="body">
+    <div class="row">
+      <span class="k">Watch 登录</span>
+      <span class="v" id="email">—</span>
+    </div>
+    <div class="row">
+      <span class="k">CC98 凭证</span>
+      <span class="v" id="token">—</span>
+    </div>
+    <div class="btns">
+      <button class="primary" id="openCC98" type="button">打开 CC98</button>
+      <button class="ghost" id="openSettings" type="button">设置</button>
+    </div>
+    <div class="tip">在 CC98 页面上按 <b>Ctrl+Shift+K</b> 打开 AI 搜索，<b>Ctrl+Shift+N</b> 打开通知。</div>
+  </div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

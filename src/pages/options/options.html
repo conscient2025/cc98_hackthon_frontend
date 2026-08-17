@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>CC98 AI+ 设置</title>
+  <style>
+    :root { --pri:#3b82f6; --bd:#e5e7eb; --txt:#1f2937; --txt2:#6b7280; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; background:#f3f4f6; color:var(--txt); }
+    .wrap { max-width:720px; margin:0 auto; padding:24px 20px 60px; }
+    h1 { font-size:20px; margin:0 0 4px; }
+    .sub { font-size:13px; color:var(--txt2); margin-bottom:20px; }
+    .card { background:#fff; border:1px solid var(--bd); border-radius:12px; padding:18px 20px; margin-bottom:16px; }
+    .card h2 { font-size:15px; margin:0 0 14px; }
+    .field { margin-bottom:12px; }
+    .field label { display:block; font-size:12px; font-weight:600; color:var(--txt2); margin-bottom:5px; }
+    .field input, .field select { width:100%; padding:9px 12px; border:1px solid var(--bd); border-radius:8px; font-size:13px; outline:none; }
+    .field input:focus, .field select:focus { border-color:var(--pri); box-shadow:0 0 0 2px rgba(59,130,246,.12); }
+    .row { display:flex; gap:12px; }
+    .row .field { flex:1; }
+    .range-val { color:var(--pri); font-weight:600; }
+    .btn { border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-primary { background:var(--pri); color:#fff; }
+    .btn-primary:hover { background:#2563eb; }
+    .btn-ghost { background:#f3f4f6; color:var(--txt); border:1px solid var(--bd); }
+    .btn-ghost:hover { background:#e5e7eb; }
+    .btn-danger { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+    .actions { display:flex; gap:10px; align-items:center; }
+    #status { font-size:13px; }
+    .hint { font-size:12px; color:var(--txt2); line-height:1.6; margin-top:4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>CC98 AI+ 设置</h1>
+    <div class="sub">配置 AI 搜索用的 LLM、搜索预算，以及订阅提醒用的 Watch 后端地址。</div>
+
+    <div class="card">
+      <h2>LLM 配置（AI 搜索用）</h2>
+      <div class="row">
+        <div class="field">
+          <label>Provider</label>
+          <select id="provider">
+            <option value="openai">OpenAI 兼容</option>
+            <option value="anthropic">Anthropic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>模型</label>
+          <input id="model" type="text" placeholder="Qwen/Qwen2.5-14B-Instruct" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Base URL</label>
+        <input id="baseUrl" type="text" placeholder="https://api.siliconflow.cn/v1" />
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <input id="apiKey" type="password" placeholder="sk-…" />
+        <div class="hint">Key 只保存在本机，只发给你填的 Base URL，绝不上传。</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Temperature（<span class="range-val" id="temperatureVal">0.3</span>）</label>
+          <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.3" />
+        </div>
+        <div class="field">
+          <label>Max Tokens（0 = 不限制）</label>
+          <input id="maxTokens" type="number" min="0" max="200000" step="256" placeholder="0" />
+          <div class="hint">留 0 就不发送该参数，由模型自己决定上限。推理模型（deepseek-reasoner 等）的思维链也占这个额度，设小了正文会被挤掉。</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="testLLM" type="button">测试连接</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>搜索预算（控制消耗与速度）</h2>
+      <div class="row">
+        <div class="field">
+          <label>关键词数（<span class="range-val" id="keywordCountVal">4</span>）</label>
+          <input id="keywordCount" type="range" min="1" max="10" step="1" />
+        </div>
+        <div class="field">
+          <label>每词搜索结果（<span class="range-val" id="searchLimitPerKeywordVal">20</span>）</label>
+          <input id="searchLimitPerKeyword" type="range" min="5" max="50" step="5" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>选取主题数（<span class="range-val" id="topicLimitVal">10</span>）</label>
+          <input id="topicLimit" type="range" min="3" max="20" step="1" />
+        </div>
+        <div class="field">
+          <label>每主题最多读回复（<span class="range-val" id="maxRepliesPerTopicVal">30</span>）</label>
+          <input id="maxRepliesPerTopic" type="range" min="5" max="60" step="5" />
+        </div>
+      </div>
+      <div class="field">
+        <label>每楼截断字数（<span class="range-val" id="maxCharsPerReplyVal">1000</span>）</label>
+        <input id="maxCharsPerReply" type="range" min="200" max="2000" step="100" />
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>内容过滤（AI 搜索去戾气）</h2>
+      <div class="row" style="align-items:center; gap:24px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input id="cleanerEnabled" type="checkbox" /> 启用过滤</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input id="cleanerModel" type="checkbox" /> 启用本地模型</label>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>过滤强度（<span class="range-val" id="cleanerThresholdVal">0.56</span>）</label>
+        <input id="cleanerThreshold" type="range" min="0.35" max="0.95" step="0.01" value="0.56" />
+        <div class="hint">数值越高过滤越严：会把更多带戾气 / 辱骂语气的回复从搜索结果里剔除。关掉「本地模型」则只靠脏话词表，更快但抓不准语气。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Watch 后端（订阅提醒用）</h2>
+      <div class="field">
+        <label>后端地址</label>
+        <input id="backendBase" type="text" placeholder="http://127.0.0.1:8000" />
+        <div class="hint">本地开发默认 http://127.0.0.1:8000。</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="save" type="button">保存设置</button>
+      <button class="btn btn-danger" id="reset" type="button">恢复默认</button>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

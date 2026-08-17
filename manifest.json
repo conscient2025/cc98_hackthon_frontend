@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "CC98 AI+",
+  "version": "0.1.0",
+  "description": "CC98 论坛 AI 搜索总结 + 订阅新帖提醒（钉钉 / 邮箱）。CC98 Token 和 LLM API Key 只在本机使用，不上传。",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://api.cc98.org/*",
+    "https://webvpn.zju.edu.cn/*",
+    "https://api.siliconflow.cn/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/pages/popup/popup.html",
+    "default_title": "CC98 AI+"
+  },
+  "options_page": "src/pages/options/options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.cc98.org/*", "https://cc98.org/*", "https://webvpn.zju.edu.cn/*"],
+      "js": ["src/content/index.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/content/*.js",
+        "src/content/lib/*.js",
+        "src/content/pipeline/*.js",
+        "src/content/cleaner/*.js",
+        "src/content/ui/*.js",
+        "src/shared/*.js",
+        "vendor/*.js"
+      ],
+      "matches": ["https://www.cc98.org/*", "https://cc98.org/*", "https://webvpn.zju.edu.cn/*"]
+    }
+  ]
+}
