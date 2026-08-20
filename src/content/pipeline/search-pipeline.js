@@ -6,7 +6,6 @@ import { generateKeywords } from './keyword-generator.js';
 import { searchAndDeduplicate } from './cc98-searcher.js';
 import { scoreTopics } from './phase1-filter.js';
 import { readReplies } from './reply-reader.js';
-import { filterTopics } from './phase2-filter.js';
 import { generateSummary } from './summarizer.js';
 import { getSearchBudget } from '../lib/storage.js';
 import { AppError, ERROR_TYPES } from '../lib/errors.js';
@@ -84,16 +83,12 @@ export async function runSearchPipeline(query, onProgress, opts = {}) {
   throwIfAborted(signal);
   emit('read', 1);
 
-  // 内容再筛选（async：内含戾气模型分类）
-  const filtered = await filterTopics(enriched);
-  throwIfAborted(signal);
-
   // 4. 总结
   emit('summarize', 0.5);
-  const summary = await generateSummary(query, keywords, filtered);
+  const summary = await generateSummary(query, keywords, enriched);
   throwIfAborted(signal);
 
-  report.topics = filtered;
+  report.topics = enriched;
   report.summary = summary;
   emit('done', 1);
 

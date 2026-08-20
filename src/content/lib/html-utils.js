@@ -51,13 +51,13 @@ export function deliveryStatusText(status) {
   return map[status] || status || '未知';
 }
 
-// 通知投递状态颜色
+// 通知投递状态颜色（用 CSS 变量，深色模式下自动换成高对比度的那一套）
 export function deliveryStatusColor(status) {
   const map = {
-    pending: '#92400e', // 棕
-    sent: '#065f46',    // 绿
-    failed: '#b91c1c',  // 红
-    skipped: '#6b7280', // 灰
+    pending: 'var(--cc98-warn)', // 棕
+    sent: 'var(--cc98-ok)',      // 绿
+    failed: 'var(--cc98-err)',   // 红
+    skipped: 'var(--cc98-txt3)', // 灰
   };
-  return map[status] || '#6b7280';
+  return map[status] || 'var(--cc98-txt3)';
 }

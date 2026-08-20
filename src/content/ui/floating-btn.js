@@ -98,8 +98,17 @@ export function createFloatingBtn({ onClick }) {
   btn.id = BTN_ID;
   btn.type = 'button';
   btn.title = 'CC98 AI+（可拖动）';
+  // 图标用内联 SVG（放大镜 + 星芒 = AI 搜索），比 emoji 清晰、跨平台一致
   btn.innerHTML = `
-    <span class="cc98-fb-icon">🤖</span>
+    <span class="cc98-fb-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <path d="M20 20l-4.6-4.6"></path>
+        <path d="M10.5 7.2l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z"
+              fill="currentColor" stroke="none"></path>
+      </svg>
+    </span>
     <span id="${BADGE_ID}" class="cc98-fb-badge" hidden>0</span>`;
   document.body.appendChild(btn);
 

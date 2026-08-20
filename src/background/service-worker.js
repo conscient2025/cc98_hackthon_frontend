@@ -4,11 +4,6 @@
 // ============================================================
 import { MSG, STORAGE_KEYS, BACKEND_DEFAULT_BASE } from '../shared/constants.js';
 
-// 本地戾气过滤模型（cc98-cleaner，BGE + 逻辑回归）。
-// 副作用导入：该 vendored 包顶层会注册 CLASSIFY / WARMUP 的 onMessage 监听，
-// 与我们下面的 FETCH 监听共存，互不干扰。
-import '../../vendor/cc98-cleaner/background.js';
-
 const BADGE_ALARM = 'badge-poll';
 
 // chrome.storage.session 默认只对「可信上下文」开放（不含内容脚本），

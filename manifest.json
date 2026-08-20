@@ -21,9 +21,6 @@
     "default_title": "CC98 AI+"
   },
   "options_page": "src/pages/options/options.html",
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-  },
   "content_scripts": [
     {
       "matches": ["https://www.cc98.org/*", "https://cc98.org/*", "https://webvpn.zju.edu.cn/*"],
@@ -38,7 +35,6 @@
         "src/content/*.js",
         "src/content/lib/*.js",
         "src/content/pipeline/*.js",
-        "src/content/cleaner/*.js",
         "src/content/ui/*.js",
         "src/shared/*.js",
         "vendor/*.js"

@@ -32,13 +32,6 @@ export const LLM_DEFAULTS = {
 // Anthropic 的 max_tokens 是必填参数，不能省略，不限制时用这个兜底
 export const ANTHROPIC_MAX_TOKENS_FALLBACK = 32000;
 
-// 过滤模型（cc98-cleaner）设置
-export const CLEANER_DEFAULTS = {
-  enabled: true,        // 总开关：是否在搜索里过滤回复
-  modelEnabled: true,   // 是否启用 BGE 模型（关掉则只用规则层）
-  threshold: 0.56,      // 最终概率 >= 此值判定为戾气/垃圾，丢弃
-};
-
 // 后端（Watch）默认地址
 export const BACKEND_DEFAULT_BASE = 'http://127.0.0.1:8000';
 // 订阅配额上限兜底值（后端暂未通过 /health 暴露，先硬编码，读到了以后端为准）
@@ -57,8 +50,6 @@ export const STORAGE_KEYS = {
   BACKEND_BASE: 'backendBaseUrl',
   USER_EMAIL: 'userEmail',
   AUTH_TOKEN: 'authToken',
-  CLEANER_ENABLED: 'cleanerEnabled',
-  CLEANER_SETTINGS: 'cleanerSettings',
   LAST_SEARCH: 'lastSearch',   // 上次搜索结果（跨标签页 / 刷新后恢复）
   NOTIFY_INTERVAL: 'notifyIntervalMinutes',
 };

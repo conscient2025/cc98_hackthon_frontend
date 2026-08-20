@@ -4,30 +4,61 @@
   <meta charset="UTF-8" />
   <title>CC98 AI+ 设置</title>
   <style>
-    :root { --pri:#3b82f6; --bd:#e5e7eb; --txt:#1f2937; --txt2:#6b7280; }
+    /* 配色与插件面板同源：CC98 青蓝，自动跟随系统深浅色 */
+    :root {
+      /* pri = 文字色，pri-fill = 按钮底色。深色模式下二者必须分开，
+         否则按钮底跟着文字变浅，按钮上的字就只能压成黑的。 */
+      --pri:#245d70; --pri-h:#1b4a5a; --pri-fill:#245d70; --pri-fill-h:#1b4a5a;
+      --pri-soft:#eef8fb; --pri-bd:#b8d5de; --on-pri:#fff;
+      --bg:#eef4f7; --card:#fff; --bd:#dfeaef; --bd-soft:#edf4f7;
+      --txt:#1a2b33; --txt2:#485e6a; --txt3:#5d7681;
+      --err:#b42318; --err-bg:#fef4f3; --err-bd:#f3ccc7; --ok:#287046;
+      --sh:0 1px 3px rgba(20,50,62,.06);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pri:#6fbdd6; --pri-h:#8ed0e5; --pri-fill:#2f7188; --pri-fill-h:#3a8299;
+        --pri-soft:#162b34; --pri-bd:#2d4c58; --on-pri:#f0f9fc;
+        --bg:#0b1317; --card:#101a1f; --bd:#25383f; --bd-soft:#1c2c33;
+        --txt:#e6eef2; --txt2:#9fb3bd; --txt3:#7d939e;
+        --err:#f2938a; --err-bg:#2a1614; --err-bd:#4a2521; --ok:#6cc48c;
+        --sh:0 1px 3px rgba(0,0,0,.4);
+        color-scheme: dark;
+      }
+    }
     * { box-sizing: border-box; }
-    body { margin:0; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; background:#f3f4f6; color:var(--txt); }
-    .wrap { max-width:720px; margin:0 auto; padding:24px 20px 60px; }
-    h1 { font-size:20px; margin:0 0 4px; }
-    .sub { font-size:13px; color:var(--txt2); margin-bottom:20px; }
-    .card { background:#fff; border:1px solid var(--bd); border-radius:12px; padding:18px 20px; margin-bottom:16px; }
-    .card h2 { font-size:15px; margin:0 0 14px; }
-    .field { margin-bottom:12px; }
-    .field label { display:block; font-size:12px; font-weight:600; color:var(--txt2); margin-bottom:5px; }
-    .field input, .field select { width:100%; padding:9px 12px; border:1px solid var(--bd); border-radius:8px; font-size:13px; outline:none; }
-    .field input:focus, .field select:focus { border-color:var(--pri); box-shadow:0 0 0 2px rgba(59,130,246,.12); }
-    .row { display:flex; gap:12px; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--txt); line-height:1.5; }
+    .wrap { max-width:760px; margin:0 auto; padding:36px 24px 80px; }
+    h1 { font-size:22px; font-weight:650; margin:0 0 5px; letter-spacing:.2px; }
+    .sub { font-size:13px; color:var(--txt2); margin-bottom:26px; }
+    .card { background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:20px 22px; margin-bottom:16px; box-shadow:var(--sh); }
+    .card h2 { font-size:14px; font-weight:650; margin:0 0 4px; letter-spacing:.2px; }
+    .card h2 + .card-sub { font-size:12px; color:var(--txt3); margin:0 0 16px; }
+    .card h2:last-of-type { margin-bottom:16px; }
+    .field { margin-bottom:14px; }
+    .field:last-child { margin-bottom:0; }
+    .field label { display:block; font-size:11px; font-weight:650; color:var(--txt2); margin-bottom:6px; letter-spacing:.3px; }
+    .field input, .field select { width:100%; padding:10px 13px; border:1px solid var(--bd); border-radius:9px; font-size:13px; font-family:inherit; color:var(--txt); background:var(--card); outline:none; transition:border-color .15s, box-shadow .15s; }
+    .field input::placeholder { color:var(--txt3); }
+    .field input:hover, .field select:hover { border-color:var(--pri-bd); }
+    .field input:focus, .field select:focus { border-color:var(--pri); box-shadow:0 0 0 3px color-mix(in srgb, var(--pri) 16%, transparent); }
+    .field input[type=range] { padding:0; border:none; background:none; accent-color:var(--pri); height:20px; cursor:pointer; }
+    .field input[type=range]:focus { box-shadow:none; }
+    .row { display:flex; gap:14px; }
     .row .field { flex:1; }
-    .range-val { color:var(--pri); font-weight:600; }
-    .btn { border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:600; cursor:pointer; }
-    .btn-primary { background:var(--pri); color:#fff; }
-    .btn-primary:hover { background:#2563eb; }
-    .btn-ghost { background:#f3f4f6; color:var(--txt); border:1px solid var(--bd); }
-    .btn-ghost:hover { background:#e5e7eb; }
-    .btn-danger { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+    .range-val { color:var(--pri); font-weight:700; font-variant-numeric:tabular-nums; }
+    .btn { border:none; border-radius:9px; padding:10px 18px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:background .15s, border-color .15s, transform .1s; }
+    .btn:active { transform:translateY(1px); }
+    .btn-primary { background:var(--pri-fill); color:var(--on-pri); }
+    .btn-primary:hover { background:var(--pri-fill-h); }
+    .btn-ghost { background:var(--card); color:var(--txt); border:1px solid var(--bd); }
+    .btn-ghost:hover { background:var(--pri-soft); border-color:var(--pri-bd); color:var(--pri); }
+    .btn-danger { background:var(--card); color:var(--err); border:1px solid var(--err-bd); }
+    .btn-danger:hover { background:var(--err-bg); }
     .actions { display:flex; gap:10px; align-items:center; }
-    #status { font-size:13px; }
-    .hint { font-size:12px; color:var(--txt2); line-height:1.6; margin-top:4px; }
+    #status { font-size:13px; font-weight:500; }
+    .hint { font-size:12px; color:var(--txt2); line-height:1.65; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -100,19 +131,6 @@
       <div class="field">
         <label>每楼截断字数（<span class="range-val" id="maxCharsPerReplyVal">1000</span>）</label>
         <input id="maxCharsPerReply" type="range" min="200" max="2000" step="100" />
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>内容过滤（AI 搜索去戾气）</h2>
-      <div class="row" style="align-items:center; gap:24px;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input id="cleanerEnabled" type="checkbox" /> 启用过滤</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input id="cleanerModel" type="checkbox" /> 启用本地模型</label>
-      </div>
-      <div class="field" style="margin-top:14px;">
-        <label>过滤强度（<span class="range-val" id="cleanerThresholdVal">0.56</span>）</label>
-        <input id="cleanerThreshold" type="range" min="0.35" max="0.95" step="0.01" value="0.56" />
-        <div class="hint">数值越高过滤越严：会把更多带戾气 / 辱骂语气的回复从搜索结果里剔除。关掉「本地模型」则只靠脏话词表，更快但抓不准语气。</div>
       </div>
     </div>
 

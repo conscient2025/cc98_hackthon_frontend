@@ -2,13 +2,14 @@
 // 设置页：LLM 配置 + 搜索预算 + Watch 后端地址
 // 扩展页拥有 host_permissions，可直接 fetch 跨域做连接测试
 // ============================================================
-import { LLM_DEFAULTS, SEARCH_BUDGET_DEFAULTS, STORAGE_KEYS, BACKEND_DEFAULT_BASE, CLEANER_DEFAULTS } from '../../shared/constants.js';
+import { LLM_DEFAULTS, SEARCH_BUDGET_DEFAULTS, STORAGE_KEYS, BACKEND_DEFAULT_BASE } from '../../shared/constants.js';
 
 const $ = (id) => document.getElementById(id);
 
 function setStatus(msg, isErr) {
   $('status').textContent = msg;
-  $('status').style.color = isErr ? '#b91c1c' : '#065f46';
+  // 用 CSS 变量而不是写死颜色，深色模式下才有足够对比度
+  $('status').style.color = isErr ? 'var(--err)' : 'var(--ok)';
 }
 
 // 申请访问某个地址的权限：用户换了 LLM / 后端地址时动态授权。
@@ -44,9 +45,6 @@ async function load() {
 
   const L = { ...LLM_DEFAULTS, ...llm };
   const B = { ...SEARCH_BUDGET_DEFAULTS, ...budget };
-  const cleaner = (await chrome.storage.local.get(STORAGE_KEYS.CLEANER_SETTINGS))[STORAGE_KEYS.CLEANER_SETTINGS] || {};
-  const C = { ...CLEANER_DEFAULTS, ...cleaner };
-
   $('provider').value = L.provider;
   $('baseUrl').value = L.baseUrl;
   $('model').value = L.model;
@@ -65,11 +63,6 @@ async function load() {
   });
 
   $('backendBase').value = base;
-
-  $('cleanerEnabled').checked = C.enabled;
-  $('cleanerModel').checked = C.modelEnabled;
-  $('cleanerThreshold').value = C.threshold;
-  $('cleanerThresholdVal').textContent = Number(C.threshold).toFixed(2);
 }
 
 async function save() {
@@ -101,16 +94,10 @@ async function save() {
     maxRepliesPerTopic: Number($('maxRepliesPerTopic').value),
     maxCharsPerReply: Number($('maxCharsPerReply').value),
   };
-  const cleaner = {
-    enabled: $('cleanerEnabled').checked,
-    modelEnabled: $('cleanerModel').checked,
-    threshold: Number($('cleanerThreshold').value),
-  };
   await chrome.storage.local.set({
     [STORAGE_KEYS.LLM]: llm,
     [STORAGE_KEYS.BUDGET]: budget,
     [STORAGE_KEYS.BACKEND_BASE]: backendBase,
-    [STORAGE_KEYS.CLEANER_SETTINGS]: cleaner,
   });
   setStatus('已保存 ✓');
 }
@@ -161,7 +148,7 @@ async function reset() {
 }
 
 // 绑定
-['temperature', 'keywordCount', 'searchLimitPerKeyword', 'topicLimit', 'maxRepliesPerTopic', 'maxCharsPerReply', 'cleanerThreshold'].forEach(bindRange);
+['temperature', 'keywordCount', 'searchLimitPerKeyword', 'topicLimit', 'maxRepliesPerTopic', 'maxCharsPerReply'].forEach(bindRange);
 $('save').addEventListener('click', save);
 $('testLLM').addEventListener('click', testLLM);
 $('reset').addEventListener('click', reset);

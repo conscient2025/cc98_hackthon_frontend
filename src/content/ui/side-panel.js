@@ -8,10 +8,10 @@ const PANEL_ID = 'cc98-ai-panel';
 const PANEL_SIZE_KEY = 'panelSize'; // 面板宽高，存 storage.local，刷新后保留
 
 const TABS = [
-  { key: 'search', label: '🔍 搜索' },
-  { key: 'subscribe', label: '📋 订阅' },
-  { key: 'notif', label: '🔔 通知' },
-  { key: 'settings', label: '⚙️ 设置' },
+  { key: 'search', label: '搜索' },
+  { key: 'subscribe', label: '订阅' },
+  { key: 'notif', label: '通知' },
+  { key: 'settings', label: '设置' },
 ];
 
 let singleton = null;
@@ -105,7 +105,7 @@ export function createSidePanel({ renderers }) {
   panel.id = PANEL_ID;
   panel.innerHTML = `
     <div class="cc98-panel-head">
-      <span class="cc98-panel-title">🤖 CC98 AI+</span>
+      <span class="cc98-panel-title">CC98 AI+</span>
       <button id="cc98-ai-close" class="cc98-panel-close" type="button" title="关闭">✕</button>
     </div>
     <div class="cc98-panel-tabs"></div>

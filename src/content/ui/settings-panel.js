@@ -123,7 +123,7 @@ async function draw(body) {
         <button id="cc98-open-options" class="cc98-secondary" type="button">打开完整设置页</button>
       </div>
       <div class="cc98-setting-help" style="margin-top:6px">
-        LLM（API Key / 模型）、搜索预算、内容过滤强度都在设置页里改，这里只管理登录和通知渠道。
+        LLM（API Key / 模型）、搜索预算都在设置页里改，这里只管理登录和通知渠道。
       </div>
     </div>
 

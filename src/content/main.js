@@ -10,7 +10,6 @@ import { renderNotifications } from './ui/notif-panel.js';
 import { renderSettings } from './ui/settings-panel.js';
 import { refreshAuth } from './lib/token-extractor.js';
 import { isCC98Site } from './lib/webvpn.js';
-import { warmupCleaner } from './cleaner/cleaner-bridge.js';
 
 const BTN_ID = 'cc98-ai-float-btn';
 const PANEL_ID = 'cc98-ai-panel';
@@ -79,9 +78,6 @@ async function boot() {
   try {
     refreshAuth();
   } catch (e) { /* ignore */ }
-
-  // 预热戾气过滤模型（后台 SW 加载 BGE），避免首次搜索卡在过滤阶段
-  warmupCleaner();
 
   // 快捷键：Ctrl+Shift+K 搜索，Ctrl+Shift+N 通知（只挂一次）
   document.addEventListener('keydown', (e) => {

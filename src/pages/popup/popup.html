@@ -4,30 +4,66 @@
   <meta charset="UTF-8" />
   <title>CC98 AI+</title>
   <style>
+    /* 配色与插件面板同源：CC98 青蓝，自动跟随系统深浅色 */
+    :root {
+      /* pri = 文字色，pri-fill = 按钮/logo 底色，深色模式下必须分开，见 styles.js 注释 */
+      --pri:#245d70; --pri-h:#1b4a5a; --pri-fill:#245d70; --pri-fill-h:#1b4a5a;
+      --pri-soft:#eef8fb; --pri-bd:#b8d5de; --on-pri:#fff;
+      --bg:#fff; --bg-sub:#f6fbfd; --bd:#dfeaef; --bd-soft:#edf4f7;
+      --txt:#1a2b33; --txt2:#485e6a; --txt3:#5d7681;
+      --ok:#287046; --warn:#7b3f00;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pri:#6fbdd6; --pri-h:#8ed0e5; --pri-fill:#2f7188; --pri-fill-h:#3a8299;
+        --pri-soft:#162b34; --pri-bd:#2d4c58; --on-pri:#f0f9fc;
+        --bg:#101a1f; --bg-sub:#16242b; --bd:#25383f; --bd-soft:#1c2c33;
+        --txt:#e6eef2; --txt2:#9fb3bd; --txt3:#7d939e;
+        --ok:#6cc48c; --warn:#e8bf7a;
+        color-scheme: dark;
+      }
+    }
     * { box-sizing: border-box; }
-    body { margin:0; width:280px; font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; color:#1f2937; }
-    .head { background:#3b82f6; color:#fff; padding:14px 16px; }
-    .head h1 { margin:0; font-size:15px; }
-    .head p { margin:2px 0 0; font-size:11px; opacity:.85; }
-    .body { padding:14px 16px; }
-    .row { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:6px 0; }
-    .row .k { color:#6b7280; }
+    body { margin:0; width:288px; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; color:var(--txt); background:var(--bg); line-height:1.5; }
+    .head { display:flex; align-items:center; gap:10px; padding:15px 16px; background:var(--bg-sub); border-bottom:1px solid var(--bd); }
+    .head .logo { width:30px; height:30px; flex-shrink:0; border-radius:8px; background:var(--pri-fill); color:var(--on-pri); display:flex; align-items:center; justify-content:center; }
+    .head .logo svg { width:17px; height:17px; display:block; }
+    .head h1 { margin:0; font-size:14px; font-weight:650; letter-spacing:.2px; }
+    .head p { margin:1px 0 0; font-size:11px; color:var(--txt3); }
+    .body { padding:14px 16px 16px; }
+    .row { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:7px 0; border-bottom:1px solid var(--bd-soft); }
+    .row:last-of-type { border-bottom:none; }
+    .row .k { color:var(--txt2); }
     .row .v { font-weight:600; }
-    .row .v.ok { color:#065f46; }
-    .row .v.no { color:#92400e; }
-    .btns { display:flex; gap:8px; margin-top:12px; }
-    button { flex:1; border:none; border-radius:8px; padding:9px 0; font-size:12px; font-weight:600; cursor:pointer; }
-    .primary { background:#3b82f6; color:#fff; }
-    .primary:hover { background:#2563eb; }
-    .ghost { background:#f3f4f6; color:#1f2937; border:1px solid #e5e7eb; }
-    .ghost:hover { background:#e5e7eb; }
-    .tip { margin-top:12px; font-size:11px; color:#6b7280; line-height:1.5; }
+    .row .v.ok { color:var(--ok); }
+    .row .v.no { color:var(--warn); }
+    .btns { display:flex; gap:8px; margin-top:14px; }
+    button { flex:1; border:none; border-radius:9px; padding:10px 0; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; transition:background .15s, border-color .15s, transform .1s; }
+    button:active { transform:translateY(1px); }
+    .primary { background:var(--pri-fill); color:var(--on-pri); }
+    .primary:hover { background:var(--pri-fill-h); }
+    .ghost { background:var(--bg); color:var(--txt); border:1px solid var(--bd); }
+    .ghost:hover { background:var(--pri-soft); border-color:var(--pri-bd); color:var(--pri); }
+    .tip { margin-top:14px; padding:10px 11px; background:var(--bg-sub); border:1px solid var(--bd-soft); border-radius:9px; font-size:11px; color:var(--txt2); line-height:1.6; }
+    .tip kbd { display:inline-block; padding:1px 5px; border:1px solid var(--bd); border-bottom-width:2px; border-radius:4px; background:var(--bg); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:10px; color:var(--txt); }
   </style>
 </head>
 <body>
   <div class="head">
-    <h1>🤖 CC98 AI+</h1>
-    <p>AI 搜索总结 · 订阅新帖提醒</p>
+    <span class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <path d="M20 20l-4.6-4.6"></path>
+        <path d="M10.5 7.2l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z"
+              fill="currentColor" stroke="none"></path>
+      </svg>
+    </span>
+    <div>
+      <h1>CC98 AI+</h1>
+      <p>AI 搜索总结 · 订阅新帖提醒</p>
+    </div>
   </div>
   <div class="body">
     <div class="row">
@@ -42,7 +78,7 @@
       <button class="primary" id="openCC98" type="button">打开 CC98</button>
       <button class="ghost" id="openSettings" type="button">设置</button>
     </div>
-    <div class="tip">在 CC98 页面上按 <b>Ctrl+Shift+K</b> 打开 AI 搜索，<b>Ctrl+Shift+N</b> 打开通知。</div>
+    <div class="tip">在 CC98 页面上按 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd> 打开 AI 搜索，<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> 打开通知。</div>
   </div>
   <script type="module" src="popup.js"></script>
 </body>

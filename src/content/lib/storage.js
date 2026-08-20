@@ -3,7 +3,7 @@
 //   local  → 持久化（LLM 配置、后端地址、用户邮箱等）
 //   session → 内存态（CC98 token，关闭浏览器即清空）
 // ============================================================
-import { STORAGE_KEYS, SESSION_KEYS, LLM_DEFAULTS, SEARCH_BUDGET_DEFAULTS, BACKEND_DEFAULT_BASE, SUBSCRIPTION_LIMIT_FALLBACK, CLEANER_DEFAULTS } from '../../shared/constants.js';
+import { STORAGE_KEYS, SESSION_KEYS, LLM_DEFAULTS, SEARCH_BUDGET_DEFAULTS, BACKEND_DEFAULT_BASE, SUBSCRIPTION_LIMIT_FALLBACK } from '../../shared/constants.js';
 
 export async function getLocal(key) {
   const obj = await chrome.storage.local.get(key);
@@ -41,11 +41,6 @@ export async function getBackendBase() {
 
 export async function getUserEmail() {
   return (await getLocal(STORAGE_KEYS.USER_EMAIL)) || '';
-}
-
-export async function getCleanerSettings() {
-  const saved = (await getLocal(STORAGE_KEYS.CLEANER_SETTINGS)) || {};
-  return { ...CLEANER_DEFAULTS, ...saved };
 }
 
 export async function getSubscriptionLimit() {
