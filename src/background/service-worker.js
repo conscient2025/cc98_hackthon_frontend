@@ -38,6 +38,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ ok: false, status: 0, data: { detail: e && e.message ? e.message : String(e) } }));
     return true; // 保持异步 sendResponse 有效
   }
+  if (msg && msg.type === MSG.OPEN_OPTIONS) {
+    chrome.runtime.openOptionsPage().catch(() => {});
+    return false;
+  }
   return false;
 });
 
@@ -68,17 +72,21 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 async function refreshBadge() {
-  const stored = await chrome.storage.local.get([STORAGE_KEYS.USER_EMAIL, STORAGE_KEYS.BACKEND_BASE]);
+  const stored = await chrome.storage.local.get([STORAGE_KEYS.USER_EMAIL, STORAGE_KEYS.BACKEND_BASE, STORAGE_KEYS.AUTH_TOKEN]);
   const email = stored[STORAGE_KEYS.USER_EMAIL];
+  const token = stored[STORAGE_KEYS.AUTH_TOKEN];
   const base = (stored[STORAGE_KEYS.BACKEND_BASE] || BACKEND_DEFAULT_BASE).replace(/\/+$/, '');
 
-  if (!email) {
+  if (!email || !token) {
     chrome.action.setBadgeText({ text: '' });
     return;
   }
 
   try {
-    const res = await fetch(`${base}/api/v1/notifications?user_id=${encodeURIComponent(email)}`);
+    // 新后端要求 JWT：通知接口以 token 识别用户，user_id 查询参数已被后端忽略
+    const res = await fetch(`${base}/api/v1/notifications`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const list = await res.json();
     const unread = Array.isArray(list) ? list.filter((n) => !n.is_read).length : 0;

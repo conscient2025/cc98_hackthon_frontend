@@ -33,7 +33,7 @@ export const LLM_DEFAULTS = {
 export const ANTHROPIC_MAX_TOKENS_FALLBACK = 32000;
 
 // 后端（Watch）默认地址
-export const BACKEND_DEFAULT_BASE = 'http://127.0.0.1:8000';
+export const BACKEND_DEFAULT_BASE = 'http://122.51.57.222:8000';
 // 订阅配额上限兜底值（后端暂未通过 /health 暴露，先硬编码，读到了以后端为准）
 export const SUBSCRIPTION_LIMIT_FALLBACK = 10;
 
@@ -64,4 +64,5 @@ export const SESSION_KEYS = {
 export const MSG = {
   FETCH: 'FETCH',                 // 通用网络代理
   REFRESH_BADGE: 'REFRESH_BADGE', // 刷新未读徽章
+  OPEN_OPTIONS: 'OPEN_OPTIONS',   // 打开设置页（内容脚本转发给 SW 执行）
 };

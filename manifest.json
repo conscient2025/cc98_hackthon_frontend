@@ -9,7 +9,8 @@
     "https://webvpn.zju.edu.cn/*",
     "https://api.siliconflow.cn/*",
     "http://127.0.0.1/*",
-    "http://localhost/*"
+    "http://localhost/*",
+    "http://122.51.57.222/*"
   ],
   "optional_host_permissions": ["http://*/*", "https://*/*"],
   "background": {

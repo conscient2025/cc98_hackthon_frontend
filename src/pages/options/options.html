@@ -64,7 +64,7 @@
 <body>
   <div class="wrap">
     <h1>CC98 AI+ 设置</h1>
-    <div class="sub">配置 AI 搜索用的 LLM、搜索预算，以及订阅提醒用的 Watch 后端地址。</div>
+    <div class="sub">配置 AI 搜索用的 LLM 和搜索预算。订阅提醒的后端地址已内置，无需配置。</div>
 
     <div class="card">
       <h2>LLM 配置（AI 搜索用）</h2>
@@ -131,15 +131,6 @@
       <div class="field">
         <label>每楼截断字数（<span class="range-val" id="maxCharsPerReplyVal">1000</span>）</label>
         <input id="maxCharsPerReply" type="range" min="200" max="2000" step="100" />
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Watch 后端（订阅提醒用）</h2>
-      <div class="field">
-        <label>后端地址</label>
-        <input id="backendBase" type="text" placeholder="http://127.0.0.1:8000" />
-        <div class="hint">本地开发默认 http://127.0.0.1:8000。</div>
       </div>
     </div>
 

@@ -83,10 +83,6 @@ export async function listNotifications() {
   return request('/api/v1/notifications?' + (await userIdQuery()));
 }
 
-export async function triggerScan() {
-  return request('/api/v1/tasks/scan', { method: 'POST', body: {} });
-}
-
 // ---------- 通知渠道 ----------
 export async function listChannels() {
   return request('/api/v1/notification-channels?' + (await userIdQuery()));
