@@ -43,6 +43,10 @@ export async function getUserEmail() {
   return (await getLocal(STORAGE_KEYS.USER_EMAIL)) || '';
 }
 
+export async function getUserId() {
+  return (await getLocal(STORAGE_KEYS.USER_ID)) || '';
+}
+
 export async function getSubscriptionLimit() {
   const v = await getLocal('subscriptionLimit');
   return v || SUBSCRIPTION_LIMIT_FALLBACK;

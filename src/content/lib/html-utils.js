@@ -19,6 +19,20 @@ export function toast(msg, dur = 3000) {
   setTimeout(() => t.remove(), dur);
 }
 
+// 服务端时间按 UTC 保存，固定显示为北京时间。
+export function fmtBeijingDateTime(s) {
+  if (!s) return '';
+  try {
+    let normalized = String(s);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(normalized)) normalized += 'Z';
+    const d = new Date(normalized);
+    if (isNaN(d.getTime())) return String(s);
+    return d.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false });
+  } catch (_) {
+    return String(s);
+  }
+}
+
 // 相对时间格式化
 export function fmtTime(s) {
   if (!s) return '';
@@ -34,30 +48,8 @@ export function fmtTime(s) {
     if (diff < 60000) return '刚刚';
     if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟前';
     if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时前';
-    return d.toLocaleDateString('zh-CN');
+    return d.toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' });
   } catch (e) {
     return String(s);
   }
-}
-
-// 通知投递状态中文映射
-export function deliveryStatusText(status) {
-  const map = {
-    pending: '待发送',
-    sent: '已发送',
-    failed: '发送失败',
-    skipped: '未配置渠道',
-  };
-  return map[status] || status || '未知';
-}
-
-// 通知投递状态颜色（用 CSS 变量，深色模式下自动换成高对比度的那一套）
-export function deliveryStatusColor(status) {
-  const map = {
-    pending: 'var(--cc98-warn)', // 棕
-    sent: 'var(--cc98-ok)',      // 绿
-    failed: 'var(--cc98-err)',   // 红
-    skipped: 'var(--cc98-txt3)', // 灰
-  };
-  return map[status] || 'var(--cc98-txt3)';
 }

@@ -31,6 +31,8 @@ export async function fetchProxy(url, options = {}) {
     const err = new Error(extractMessage(res));
     err.status = res.status;
     err.detail = res.data;
+    err.headers = res.headers || {};
+    err.retryAfter = Number(err.headers['retry-after']) || 0;
     throw err;
   }
   return res.data;
