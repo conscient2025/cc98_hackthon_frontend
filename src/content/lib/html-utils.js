@@ -19,6 +19,20 @@ export function toast(msg, dur = 3000) {
   setTimeout(() => t.remove(), dur);
 }
 
+// 服务端时间按 UTC 保存，固定显示为北京时间。
+export function fmtBeijingDateTime(s) {
+  if (!s) return '';
+  try {
+    let normalized = String(s);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(normalized)) normalized += 'Z';
+    const d = new Date(normalized);
+    if (isNaN(d.getTime())) return String(s);
+    return d.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false });
+  } catch (_) {
+    return String(s);
+  }
+}
+
 // 相对时间格式化
 export function fmtTime(s) {
   if (!s) return '';
@@ -34,7 +48,7 @@ export function fmtTime(s) {
     if (diff < 60000) return '刚刚';
     if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟前';
     if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时前';
-    return d.toLocaleDateString('zh-CN');
+    return d.toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' });
   } catch (e) {
     return String(s);
   }

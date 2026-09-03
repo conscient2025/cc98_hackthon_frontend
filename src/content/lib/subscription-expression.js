@@ -16,10 +16,10 @@ export function parseSubscriptionExpression(value, maxLength = 255) {
   const normalized = raw.trim().replace(/\s*\/\s*/gu, '/').replace(/\s+/gu, ' ');
   const length = codePointLength(normalized);
   if (!normalized) {
-    return { valid: false, normalized, groups: [], length, error: '请输入订阅表达式' };
+    return { valid: false, normalized, groups: [], length, error: '请输入订阅关键词' };
   }
   if (length > maxLength) {
-    return { valid: false, normalized, groups: [], length, error: `订阅表达式不能超过 ${maxLength} 个字符` };
+    return { valid: false, normalized, groups: [], length, error: `订阅内容不能超过 ${maxLength} 个字符` };
   }
 
   const groups = [];

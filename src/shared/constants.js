@@ -68,4 +68,5 @@ export const SESSION_KEYS = {
 export const MSG = {
   FETCH: 'FETCH',                 // 通用网络代理
   SET_BADGE: 'SET_BADGE',         // 同步工具栏图标上的本机未读数
+  OPEN_OPTIONS: 'OPEN_OPTIONS',   // 由扩展后台打开完整设置页
 };

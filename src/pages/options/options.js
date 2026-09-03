@@ -16,6 +16,7 @@ import {
   testChannel,
 } from '../../content/lib/backend-api.js';
 import { getEmail, isLoggedIn, logout, sendCode, verifyCode } from '../../content/lib/auth.js';
+import { fmtBeijingDateTime } from '../../content/lib/html-utils.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -100,7 +101,7 @@ function readBudgetForm() {
 }
 
 function validateLLM(config) {
-  if (!config.apiKey) return '请填写 API Key';
+  if (!config.apiKey) return '请填写 AI 密钥';
   if (!config.model) return '请填写模型名称';
   if (!config.baseUrl) return '请填写 API 地址';
   try {
@@ -179,7 +180,7 @@ async function saveLLM() {
   }
   await chrome.storage.local.set({ [STORAGE_KEYS.LLM]: config });
   savedLLMSnapshot = JSON.stringify(config);
-  setStatus('llmStatus', 'AI 配置已保存 ✓');
+  setStatus('llmStatus', 'AI 设置已保存 ✓');
 }
 
 async function testLLM() {
@@ -231,7 +232,7 @@ async function testLLM() {
 async function resetLLM() {
   await chrome.storage.local.remove(STORAGE_KEYS.LLM);
   fillLLM({ ...LLM_DEFAULTS });
-  setStatus('llmStatus', '已恢复默认，API Key 已清除');
+  setStatus('llmStatus', '已恢复默认，AI 密钥已清除');
 }
 
 async function saveBudget() {
@@ -251,12 +252,6 @@ function formatInterval(minutes) {
   if (minutes % 1440 === 0) return `${minutes / 1440} 天`;
   if (minutes % 60 === 0) return `${minutes / 60} 小时`;
   return `${minutes} 分钟`;
-}
-
-function formatTime(value) {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
 }
 
 function getChannel(provider) {
@@ -285,12 +280,12 @@ function renderChannelRuntime(provider) {
   if (!channel || !channel.last_dispatch_status) return;
   if (channel.last_dispatch_status === 'failed') {
     runtime.classList.add('error');
-    runtime.textContent = `最近一次发送失败：${channel.last_dispatch_error || '请检查渠道配置'}。失败批次不会自动补发。`;
+    runtime.textContent = `最近一次提醒没有发出去：${channel.last_dispatch_error || '请检查接收方式'}。这次提醒不会自动重发。`;
     return;
   }
   if (channel.last_sent_at) {
     runtime.classList.add('ok');
-    runtime.textContent = `最近发送成功：${formatTime(channel.last_sent_at)}`;
+    runtime.textContent = `最近发送成功（北京时间）：${fmtBeijingDateTime(channel.last_sent_at)}`;
   }
 }
 
@@ -328,14 +323,14 @@ function setWatchPanels(loggedIn) {
 async function loadWatchHealth() {
   const status = $('watchBackendStatus');
   status.classList.remove('error');
-  status.textContent = '正在检测 Watch 后端…';
+  status.textContent = '正在连接订阅提醒服务…';
   try {
     const health = await getHealth();
     const scan = health && health.components && health.components.scan_interval_minutes;
-    status.textContent = `Watch 后端在线 · 扫描间隔 ${scan || '—'} 分钟`;
+    status.textContent = `订阅提醒服务正常 · 每 ${scan || '—'} 分钟查看一次新帖`;
   } catch (_) {
     status.classList.add('error');
-    status.textContent = 'Watch 后端离线，请稍后重试。AI 搜索不受影响。';
+    status.textContent = '订阅提醒服务暂时不可用，请稍后重试。AI 搜索仍然可以使用。';
   }
 }
 
@@ -449,7 +444,7 @@ async function saveNotifyInterval() {
   const button = $('saveNotifyInterval');
   const interval = Number($('notifyInterval').value);
   if (!watchChannelsLoaded) {
-    setStatus('intervalStatus', '通知渠道状态尚未加载，请稍后重试', 'error');
+    setStatus('intervalStatus', '还没有读到接收方式，请稍后重试', 'error');
     return;
   }
   button.disabled = true;
@@ -484,7 +479,7 @@ async function saveWatchChannel(provider) {
   const button = $(provider === 'dingtalk' ? 'saveDingtalk' : 'saveEmailChannel');
 
   if (!watchChannelsLoaded) {
-    setStatus(statusId, '通知渠道状态尚未加载，请稍后重试', 'error');
+    setStatus(statusId, '还没有读到接收方式，请稍后重试', 'error');
     return;
   }
 
@@ -517,7 +512,7 @@ async function saveWatchChannel(provider) {
     }
     renderChannelForm(provider);
     channelDirty[provider] = false;
-    setStatus(statusId, '渠道配置已保存 ✓');
+    setStatus(statusId, '接收方式已保存 ✓');
   } catch (error) {
     setStatus(statusId, error.message || '保存失败', 'error');
   } finally {
@@ -537,7 +532,7 @@ async function testWatchChannel(provider) {
     return;
   }
   if (provider === 'dingtalk' && current && current.has_secret && !config.secret) {
-    setStatus(statusId, '该机器人使用加签，测试时请重新填写完整 Secret', 'error');
+    setStatus(statusId, '这个机器人设置了加签，发送测试时请重新填写完整 Secret', 'error');
     return;
   }
   if (provider === 'email' && !config.to) {
@@ -577,8 +572,8 @@ async function toggleWatchChannel(provider) {
     setStatus(
       statusId,
       channelDirty[provider]
-        ? `渠道已${enabled ? '启用' : '停用'}；表单修改尚未保存`
-        : `渠道已${enabled ? '启用' : '停用'} ✓`,
+        ? `已${enabled ? '开始' : '停止'}发送提醒；上面的修改尚未保存`
+        : `已${enabled ? '开始' : '停止'}发送提醒 ✓`,
       channelDirty[provider] ? 'pending' : 'ok',
     );
   } catch (error) {
@@ -629,7 +624,7 @@ $('logoutWatch').addEventListener('click', async () => {
   $('watchCode').value = '';
   setWatchPanels(false);
   chrome.runtime.sendMessage({ type: MSG.SET_BADGE, count: 0 }).catch(() => {});
-  setStatus('watchLoginStatus', '已退出 Watch 登录');
+  setStatus('watchLoginStatus', '已退出订阅提醒');
 });
 $('saveNotifyInterval').addEventListener('click', saveNotifyInterval);
 $('notifyInterval').addEventListener('change', () => {

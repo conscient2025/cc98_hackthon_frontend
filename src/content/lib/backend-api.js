@@ -1,5 +1,5 @@
 // ============================================================
-// Watch 后端 API 客户端（订阅 / 通知 / 渠道 / 扫描 / 认证）
+// 订阅提醒服务 API 客户端（订阅 / 通知 / 接收方式 / 扫描 / 认证）
 //   用户身份完全来自 JWT，不发送 user_id
 // ============================================================
 import { getBackendBase, getLocal, setLocal } from './storage.js';
@@ -32,7 +32,7 @@ async function request(path, { method = 'GET', body } = {}) {
   } catch (e) {
     // fetchProxy 已把非 2xx 转成带 .status 的 Error；无 .status 说明网络/SW 挂了
     if (!e || !e.status) {
-      throw new AppError(ERROR_TYPES.BACKEND_OFFLINE, '无法连接 Watch 后端', (e && e.message) || '');
+      throw new AppError(ERROR_TYPES.BACKEND_OFFLINE, '暂时无法连接订阅提醒服务', (e && e.message) || '');
     }
     if (e.status === 401 && t) {
       await setLocal(STORAGE_KEYS.AUTH_TOKEN, '');
@@ -44,7 +44,7 @@ async function request(path, { method = 'GET', body } = {}) {
     }
     const backendError = new AppError(
       ERROR_TYPES.BACKEND_ERROR,
-      (e && e.message) || '后端返回错误',
+      (e && e.message) || '订阅提醒服务返回错误',
       { status: e.status, detail: e.detail, retryAfter: e.retryAfter }
     );
     backendError.status = e.status;

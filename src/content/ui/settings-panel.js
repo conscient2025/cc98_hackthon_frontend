@@ -4,6 +4,7 @@
 import { isLoggedIn, getEmail } from '../lib/auth.js';
 import { getLLMConfig } from '../lib/storage.js';
 import { esc } from '../lib/html-utils.js';
+import { MSG } from '../../shared/constants.js';
 
 export async function renderSettings(body) {
   body.innerHTML = `<div class="cc98-loading"><span class="cc98-spin"></span>加载中…</div>`;
@@ -18,32 +19,41 @@ export async function renderSettings(body) {
 
     body.innerHTML = `
       <div class="cc98-settings-intro">
-        AI 搜索和订阅通知是两个并列、互不依赖的功能。完整配置集中在同一个设置页中。
+        AI 搜索和订阅通知都在同一个设置页，但可以分开使用，只配置你需要的功能即可。
       </div>
       <div class="cc98-settings-features">
         <div class="cc98-settings-feature">
           <div class="feature-name">AI 搜索</div>
-          <div class="feature-desc">本机调用你选择的 AI 服务，不依赖 Watch 登录。</div>
-          <div class="feature-status ${llmReady ? 'ready' : ''}">${llmReady ? 'AI 服务已配置' : '尚未配置 API Key'}</div>
+          <div class="feature-desc">使用你自己的 AI 密钥，不用登录订阅提醒。</div>
+          <div class="feature-status ${llmReady ? 'ready' : ''}">${llmReady ? 'AI 服务已设置' : '还未填写 AI 密钥'}</div>
         </div>
         <div class="cc98-settings-feature">
           <div class="feature-name">订阅通知</div>
-          <div class="feature-desc">由 Watch 后端扫描并投递，不依赖 LLM API Key。</div>
-          <div class="feature-status ${watchLoggedIn ? 'ready' : ''}">${watchLoggedIn ? `已登录 ${esc(email)}` : '尚未登录 Watch'}</div>
+          <div class="feature-desc">服务器定时查找新帖，不需要 AI 密钥。</div>
+          <div class="feature-status ${watchLoggedIn ? 'ready' : ''}">${watchLoggedIn ? `已登录 ${esc(email)}` : '还未登录订阅提醒'}</div>
         </div>
       </div>
       <div class="cc98-setting-help cc98-settings-security">
-        API Key 只保存在浏览器扩展本地并发往所选 AI 地址；订阅登录令牌保存在本机，订阅表达式与渠道配置存入 Watch 后端。两套凭证不会共用。
+        AI 密钥只保存在当前浏览器并发给所选 AI 服务；订阅关键词和接收方式只发给订阅提醒服务器。两边不会共用账号或密钥。
       </div>
       <div class="cc98-panel-actions">
         <button id="cc98-open-full-settings" class="cc98-primary" type="button">打开完整设置</button>
       </div>`;
 
-    body.querySelector('#cc98-open-full-settings').addEventListener('click', async () => {
+    const openButton = body.querySelector('#cc98-open-full-settings');
+    openButton.addEventListener('click', async () => {
+      openButton.disabled = true;
+      openButton.textContent = '正在打开…';
       try {
-        await chrome.runtime.openOptionsPage();
-      } catch (_) {
-        window.open(chrome.runtime.getURL('src/pages/options/options.html'), '_blank', 'noopener');
+        const response = await chrome.runtime.sendMessage({ type: MSG.OPEN_OPTIONS });
+        if (!response || !response.ok) throw new Error((response && response.error) || '打开失败');
+        openButton.disabled = false;
+        openButton.textContent = '打开完整设置';
+      } catch (error) {
+        openButton.disabled = false;
+        openButton.textContent = '打开完整设置';
+        const security = body.querySelector('.cc98-settings-security');
+        security.textContent = `设置页打开失败：${error.message || error}。请从浏览器右上角的扩展菜单进入设置。`;
       }
     });
   } catch (error) {

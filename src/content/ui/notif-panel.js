@@ -134,8 +134,8 @@ function renderChannelFailures(channels) {
   if (!failures.length) return '';
   return failures.map((channel) => `
     <div class="cc98-error cc98-channel-alert">
-      <div class="cc98-error-head">最近一次${esc(names[channel.provider] || channel.provider)}提醒发送失败</div>
-      <div class="cc98-error-hint">${esc(channel.last_dispatch_error || '请检查渠道配置')}。本批次不会自动补发，相关帖子仍保留在下方通知列表中。</div>
+      <div class="cc98-error-head">最近一次${esc(names[channel.provider] || channel.provider)}提醒没有发出去</div>
+      <div class="cc98-error-hint">${esc(channel.last_dispatch_error || '请检查接收方式')}。这次提醒不会自动重发，但相关帖子仍会保留在下方。</div>
     </div>`).join('');
 }
 
@@ -162,7 +162,7 @@ async function refresh(body, force) {
 
   const listEl = body.querySelector('#cc98-notif-list');
   if (!list.length) {
-    listEl.innerHTML = `<div class="cc98-empty"><div class="cc98-empty-icon">📭</div><div class="cc98-empty-sub">暂无通知。后端会定时扫描新帖，命中后会出现在这里</div></div>`;
+    listEl.innerHTML = `<div class="cc98-empty"><div class="cc98-empty-icon">📭</div><div class="cc98-empty-sub">暂无通知。订阅提醒服务会定时查看新帖，找到符合关键词的帖子后会显示在这里</div></div>`;
   } else {
     listEl.innerHTML = list
       .map((notification) => {

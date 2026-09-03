@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CC98 AI+",
   "version": "0.2.0",
-  "description": "CC98 论坛 AI 搜索总结 + 订阅新帖提醒（钉钉 / 邮箱）。CC98 Token 和 LLM API Key 只在本机使用，不上传。",
+  "description": "CC98 论坛 AI 搜索总结 + 订阅新帖提醒（钉钉 / 邮箱）。CC98 登录信息和 AI 密钥只保存在本机。",
   "permissions": ["storage", "alarms"],
   "host_permissions": [
     "https://api.cc98.org/*",

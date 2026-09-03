@@ -1,6 +1,6 @@
 // ============================================================
 // 后台 Service Worker：通用 fetch 代理 + 工具栏徽章同步
-//   所有跨域请求（CC98 API / LLM / Watch 后端）经这里转发，绕过 CORS
+//   所有跨域请求（CC98 API / AI 服务 / 订阅提醒服务）经这里转发，绕过 CORS
 // ============================================================
 import { MSG } from '../shared/constants.js';
 
@@ -50,6 +50,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const count = Math.max(0, Number(msg.count) || 0);
     chrome.action.setBadgeText({ text: count ? (count > 99 ? '99+' : String(count)) : '' });
     return false;
+  }
+  if (msg && msg.type === MSG.OPEN_OPTIONS) {
+    chrome.runtime.openOptionsPage()
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) => sendResponse({ ok: false, error: error && error.message ? error.message : String(error) }));
+    return true;
   }
   return false;
 });

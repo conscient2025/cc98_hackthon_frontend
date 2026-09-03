@@ -51,7 +51,7 @@ async function draw(body) {
       订阅 ${subs.length} / ${policy.limit}
     </div>
     <div class="cc98-setting-field">
-      <label for="cc98-sub-expression">订阅表达式</label>
+      <label for="cc98-sub-expression">订阅关键词</label>
       <div class="cc98-form-row" style="margin-bottom:8px">
         <input id="cc98-sub-expression" class="cc98-input" type="text"
                placeholder="例如：C++ 后端/服务端 实习" ${reachedLimit ? 'disabled' : ''} />
@@ -61,7 +61,7 @@ async function draw(body) {
         <span>空格表示“且”，半角 / 表示“或”；其他相连字符按原样匹配。每个关键词至少 2 个字符。</span>
       </div>
       <div id="cc98-sub-preview" class="cc98-expression-preview neutral">
-        输入后将在这里显示解析结果并检查语法。
+        输入后会在这里显示实际的匹配方式，并检查写法是否正确。
       </div>
       ${reachedLimit ? '<div class="cc98-setting-help" style="margin-top:8px">已达到数量上限。可以暂停或恢复现有订阅；删除一条后才能新增。</div>' : ''}
     </div>
@@ -79,18 +79,18 @@ async function draw(body) {
 
     if (!input.value.trim()) {
       preview.className = 'cc98-expression-preview neutral';
-      preview.textContent = '输入后将在这里显示解析结果并检查语法。';
+      preview.textContent = '输入后会在这里显示实际的匹配方式，并检查写法是否正确。';
       return;
     }
     if (!parsed.valid) {
       preview.className = 'cc98-expression-preview invalid';
-      preview.innerHTML = `<span class="cc98-expression-state">无法提交</span>${esc(parsed.error)}`;
+      preview.innerHTML = `<span class="cc98-expression-state">请修改</span>${esc(parsed.error)}`;
       return;
     }
 
     preview.className = 'cc98-expression-preview valid';
     preview.innerHTML = `
-      <span class="cc98-expression-state">解析成功</span>
+      <span class="cc98-expression-state">匹配方式</span>
       <span class="cc98-expression-groups">
         ${parsed.groups.map((terms) => `
           <span class="cc98-expression-group">${terms.map((term) => `<span>${esc(term)}</span>`).join('<b>或</b>')}</span>
