@@ -72,7 +72,7 @@ function extractText(data, isAnthropic) {
       if (text) return text;
     }
     if (data && data.stop_reason === 'max_tokens') {
-      throw new AppError(ERROR_TYPES.OUTPUT_TRUNCATED, '模型输出被 Max Tokens 截断，正文为空');
+      throw new AppError(ERROR_TYPES.OUTPUT_TRUNCATED, '模型输出被截断，正文为空');
     }
   } else if (data && Array.isArray(data.choices) && data.choices.length) {
     const choice = data.choices[0];
@@ -80,12 +80,12 @@ function extractText(data, isAnthropic) {
     if (msg.content) return msg.content;
 
     // 推理模型（deepseek-reasoner / deepseek-v4-pro 等）会先输出思维链 reasoning_content，
-    // 再输出正文 content。Max Tokens 不够时思维链占满额度，content 就是空字符串。
+    // 再输出正文 content。输出额度不足时思维链可能占满额度，content 就是空字符串。
     const reasoningLen = String(msg.reasoning_content || '').length;
     if (choice.finish_reason === 'length') {
       throw new AppError(
         ERROR_TYPES.OUTPUT_TRUNCATED,
-        '模型输出被 Max Tokens 截断，正文为空',
+        '模型输出被截断，正文为空',
         reasoningLen
           ? `这是推理模型，思维链吃掉了全部额度（reasoning ${reasoningLen} 字符，content 0 字符）`
           : '输出长度不足，未能产生正文'

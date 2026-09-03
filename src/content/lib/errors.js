@@ -101,7 +101,7 @@ function hintFor(type) {
     case ERROR_TYPES.CONTEXT_OVERFLOW:
       return '请减少搜索预算（关键词数 / 回复数）后重试。';
     case ERROR_TYPES.OUTPUT_TRUNCATED:
-      return '把设置页的 Max Tokens 调大（建议 8192 以上），或换用非推理模型（如 deepseek-chat）——推理模型的思维链会占掉大量额度。';
+      return '请缩小搜索范围后重试，或换用输出能力更稳定的模型。';
     case ERROR_TYPES.MODEL_FORMAT_ERROR:
       return '模型返回格式异常，请重试，或更换更稳定的模型。';
     case ERROR_TYPES.NO_RESULTS:

@@ -150,6 +150,19 @@ const CSS = `
 .cc98-setting-inline input[type=checkbox]{accent-color:var(--cc98-pri);width:15px;height:15px;cursor:pointer}
 .cc98-setting-help{font-size:12px;line-height:1.65;color:var(--cc98-txt2);background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);padding:10px 12px}
 
+/* ============ 订阅表达式实时解析 ============ */
+.cc98-expression-meta{display:flex;justify-content:space-between;gap:12px;font-size:11px;line-height:1.55;color:var(--cc98-txt3);margin-bottom:8px}
+.cc98-expression-meta span:last-child{flex-shrink:0;font-variant-numeric:tabular-nums}
+.cc98-expression-meta span.invalid{color:var(--cc98-err);font-weight:650}
+.cc98-expression-preview{font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg-sub);color:var(--cc98-txt2)}
+.cc98-expression-preview.valid{background:var(--cc98-ok-bg);color:var(--cc98-ok);border-color:transparent}
+.cc98-expression-preview.invalid{background:var(--cc98-err-bg);color:var(--cc98-err);border-color:var(--cc98-err-bd)}
+.cc98-expression-state{font-weight:650;margin-right:9px}
+.cc98-expression-groups{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px}
+.cc98-expression-groups>i{font-style:normal;font-weight:650;color:var(--cc98-txt2)}
+.cc98-expression-group{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:8px;background:var(--cc98-bg);border:1px solid var(--cc98-pri-bd)}
+.cc98-expression-group b{font-size:10px;color:var(--cc98-txt3)}
+
 /* ============ 结果元信息（上次搜索 + 清空） ============ */
 .cc98-result-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--cc98-txt3);margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--cc98-bd-soft)}
 .cc98-result-meta[hidden]{display:none}
@@ -294,6 +307,10 @@ const CSS = `
 .cc98-notif .nt a:hover{text-decoration:underline}
 .cc98-notif .nm{font-size:11px;color:var(--cc98-txt3);margin-top:4px;line-height:1.55}
 .cc98-notif.unread{background:var(--cc98-pri-soft);margin:0 -16px;padding:11px 16px 11px 13px;border-left:3px solid var(--cc98-pri)}
+.cc98-notif-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--cc98-bd-soft);font-size:11px;color:var(--cc98-txt3)}
+.cc98-notif-toolbar .cc98-secondary{padding:6px 10px;font-size:11px}
+.cc98-notif-new{margin:8px 0;padding:7px 10px;border-radius:8px;background:var(--cc98-pri-soft);color:var(--cc98-pri);font-size:12px;font-weight:600}
+.cc98-channel-alert{margin-top:0}
 
 /* ============ 登录 / 配额 / 渠道 ============ */
 .cc98-login-hint{font-size:12px;color:var(--cc98-txt2);line-height:1.7;margin-bottom:14px;padding:11px 12px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm)}
@@ -302,6 +319,8 @@ const CSS = `
 .cc98-channel{border:1px solid var(--cc98-bd);border-radius:var(--cc98-rad-sm);padding:13px;margin-bottom:12px;background:var(--cc98-bg)}
 .cc98-channel .ch-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
 .cc98-channel .ch-title{font-size:13px;font-weight:650;color:var(--cc98-txt)}
+.cc98-channel-status{margin-top:10px;margin-bottom:0}
+.cc98-channel-status.ok{padding:8px 10px;border-radius:8px;background:var(--cc98-ok-bg);color:var(--cc98-ok);font-size:11px}
 
 /* ============ 防站方样式污染：文字色兜底 ============
    面板注入在 CC98 页面里，共享同一份层叠上下文。上面那些 .cc98-xxx 规则
@@ -348,6 +367,10 @@ const CSS = `
 #cc98-ai-panel .cc98-sub.paused .tn,
 #cc98-ai-panel .cc98-notif .nm{color:var(--cc98-txt3)}
 
+#cc98-ai-panel .cc98-expression-meta,
+#cc98-ai-panel .cc98-expression-preview.neutral,
+#cc98-ai-panel .cc98-notif-toolbar{color:var(--cc98-txt3)}
+
 #cc98-ai-panel .cc98-tab.active,
 #cc98-ai-panel .cc98-link-btn,
 #cc98-ai-panel .cc98-progress-pct,
@@ -363,10 +386,14 @@ const CSS = `
 
 #cc98-ai-panel .cc98-chip.done{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-quota.warn{color:var(--cc98-warn)}
+#cc98-ai-panel .cc98-expression-preview.valid,
+#cc98-ai-panel .cc98-channel-status.ok{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-error,
 #cc98-ai-panel .cc98-error-detail summary,
 #cc98-ai-panel .cc98-error-detail pre,
-#cc98-ai-panel .cc98-sub .del{color:var(--cc98-err)}
+#cc98-ai-panel .cc98-sub .del,
+#cc98-ai-panel .cc98-expression-preview.invalid,
+#cc98-ai-panel .cc98-expression-meta span.invalid{color:var(--cc98-err)}
 
 /* 输入框背景也要钉：站方给 input 设了浅底会和我们的浅字撞成白底白字 */
 #cc98-ai-panel .cc98-input,

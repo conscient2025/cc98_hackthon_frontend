@@ -34,8 +34,10 @@ export const ANTHROPIC_MAX_TOKENS_FALLBACK = 32000;
 
 // 后端（Watch）默认地址
 export const BACKEND_DEFAULT_BASE = 'http://122.51.57.222:8000';
-// 订阅配额上限兜底值（后端暂未通过 /health 暴露，先硬编码，读到了以后端为准）
+// 后端健康接口不可用时使用的订阅规则兜底值
 export const SUBSCRIPTION_LIMIT_FALLBACK = 10;
+export const SUBSCRIPTION_EXPRESSION_MAX_LENGTH_FALLBACK = 255;
+export const NOTIFICATION_READ_COOLDOWN_SECONDS_FALLBACK = 60;
 
 // 通知间隔可选项（分钟，10 的倍数），下拉框档位
 export const NOTIFY_INTERVAL_PRESETS = [10, 30, 60, 120, 240, 360, 720, 1440];
@@ -49,9 +51,11 @@ export const STORAGE_KEYS = {
   BUDGET: 'searchBudget',
   BACKEND_BASE: 'backendBaseUrl',
   USER_EMAIL: 'userEmail',
+  USER_ID: 'userId',
   AUTH_TOKEN: 'authToken',
   LAST_SEARCH: 'lastSearch',   // 上次搜索结果（跨标签页 / 刷新后恢复）
   NOTIFY_INTERVAL: 'notifyIntervalMinutes',
+  NOTIFICATION_STATES: 'notificationStates', // 按后端地址 + 用户隔离的通知缓存/查看位置
 };
 
 // 内存态存储 key（chrome.storage.session）
@@ -63,6 +67,5 @@ export const SESSION_KEYS = {
 // 后台 Service Worker ↔ 内容脚本 消息类型
 export const MSG = {
   FETCH: 'FETCH',                 // 通用网络代理
-  REFRESH_BADGE: 'REFRESH_BADGE', // 刷新未读徽章
-  OPEN_OPTIONS: 'OPEN_OPTIONS',   // 打开设置页（内容脚本转发给 SW 执行）
+  SET_BADGE: 'SET_BADGE',         // 同步工具栏图标上的本机未读数
 };

@@ -5,7 +5,8 @@ import { listChannels, saveChannel, testChannel, getHealth } from '../lib/backen
 import { isLoggedIn, getEmail, logout, sendCode, verifyCode } from '../lib/auth.js';
 import { getLocal, setLocal } from '../lib/storage.js';
 import { STORAGE_KEYS, NOTIFY_INTERVAL_PRESETS, MSG } from '../../shared/constants.js';
-import { esc, toast } from '../lib/html-utils.js';
+import { updateBadge } from './floating-btn.js';
+import { esc, fmtTime, toast } from '../lib/html-utils.js';
 
 function fmtInterval(min) {
   if (!min) return '';
@@ -99,14 +100,10 @@ async function draw(body) {
   const email = await getEmail();
   const storedInterval = (await getLocal(STORAGE_KEYS.NOTIFY_INTERVAL)) || 60;
 
-  let channels = [];
-  try {
-    channels = (await listChannels()) || [];
-  } catch (_) {
-    channels = [];
-  }
+  const channels = (await listChannels()) || [];
   const ding = channels.find((c) => c.provider === 'dingtalk') || null;
   const mail = channels.find((c) => c.provider === 'email') || null;
+  const dingHasWebhook = !!(ding && ding.config && ding.config.webhook);
 
   // 共享通知间隔：优先取已存渠道的值
   const currentInterval = ding ? ding.notify_interval_minutes : (mail ? mail.notify_interval_minutes : storedInterval);
@@ -116,16 +113,6 @@ async function draw(body) {
   ).join('');
 
   body.innerHTML = `
-    <div class="cc98-setting-field">
-      <label>高级配置</label>
-      <div class="cc98-setting-inline">
-        <button id="cc98-open-options" class="cc98-secondary" type="button">打开完整设置页</button>
-      </div>
-      <div class="cc98-setting-help" style="margin-top:6px">
-        LLM（API Key / 模型）、搜索预算都在设置页里改，这里只管理登录和通知渠道。
-      </div>
-    </div>
-
     <div class="cc98-setting-field">
       <label>账号</label>
       <div class="cc98-setting-inline">
@@ -152,18 +139,20 @@ async function draw(body) {
         </div>
         <div class="cc98-setting-field" style="margin-bottom:8px">
           <label>Webhook 地址</label>
-          <input id="cc98-ding-webhook" class="cc98-input" type="text" placeholder="https://oapi.dingtalk.com/robot/send?access_token=…"
-                 value="${esc((ding && ding.config && ding.config.webhook) || '')}" />
+          <input id="cc98-ding-webhook" class="cc98-input" type="password" placeholder="https://oapi.dingtalk.com/robot/send?access_token=…"
+                 value="" />
+          ${dingHasWebhook ? '<div class="cc98-setting-help" style="margin-top:6px">Webhook 已保存且不会回传。修改渠道或发送测试时，请重新粘贴完整地址。</div>' : ''}
         </div>
         <div class="cc98-setting-field" style="margin-bottom:8px">
           <label>加签 Secret</label>
-          <input id="cc98-ding-secret" class="cc98-input" type="text"
-                 placeholder="${ding && ding.has_secret ? '已保存，留空则保持不变' : 'SEC…'}" />
+          <input id="cc98-ding-secret" class="cc98-input" type="password"
+                 placeholder="${ding && ding.has_secret ? '已保存；保存时可留空，测试时需重填' : 'SEC…'}" />
         </div>
         <div class="cc98-panel-actions" style="margin-bottom:0">
           <button class="cc98-primary" type="button" data-save="dingtalk">保存</button>
-          <button class="cc98-secondary" type="button" data-test="dingtalk">测试</button>
+          <button class="cc98-secondary" type="button" data-test="dingtalk">发送测试（不保存）</button>
         </div>
+        ${channelRuntimeStatus(ding, '钉钉')}
       </div>
 
       <div class="cc98-channel">
@@ -183,8 +172,9 @@ async function draw(body) {
         </div>
         <div class="cc98-panel-actions" style="margin-bottom:0">
           <button class="cc98-primary" type="button" data-save="email">保存</button>
-          <button class="cc98-secondary" type="button" data-test="email">测试</button>
+          <button class="cc98-secondary" type="button" data-test="email">发送测试（不保存）</button>
         </div>
+        ${channelRuntimeStatus(mail, '邮箱')}
       </div>
     </div>
 
@@ -208,17 +198,13 @@ async function draw(body) {
   // 退出登录
   body.querySelector('#cc98-logout').addEventListener('click', async () => {
     await logout();
+    updateBadge(0);
+    chrome.runtime.sendMessage({ type: MSG.SET_BADGE, count: 0 }).catch(() => {});
     renderLogin(body);
   });
 
-  // 打开完整设置页（LLM / 预算 / 过滤强度都在那里）。
-  // 内容脚本里拿不到 openOptionsPage，转发给 SW 去打开。
-  body.querySelector('#cc98-open-options').addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: MSG.OPEN_OPTIONS }).catch(() => {});
-  });
-
   // 读取各渠道表单
-  function dingConfig() {
+  function dingConfig(forTest) {
     const secretInput = body.querySelector('#cc98-ding-secret');
     const secret = secretInput.value.trim();
     return {
@@ -227,7 +213,7 @@ async function draw(body) {
       notifyIntervalMinutes: Number(body.querySelector('#cc98-interval').value),
       config: {
         webhook: body.querySelector('#cc98-ding-webhook').value.trim(),
-        secret: secret || (ding && ding.has_secret ? '***' : ''),
+        secret: secret || (!forTest && ding && ding.has_secret ? '***' : ''),
       },
     };
   }
@@ -248,7 +234,19 @@ async function draw(body) {
     btn.addEventListener('click', async () => {
       const provider = btn.dataset.save || btn.dataset.test;
       const isTest = !!btn.dataset.test;
-      const cfg = provider === 'dingtalk' ? dingConfig() : mailConfig();
+      const cfg = provider === 'dingtalk' ? dingConfig(isTest) : mailConfig();
+      if (provider === 'dingtalk' && !cfg.config.webhook) {
+        toast('请填写完整的钉钉 Webhook 地址');
+        return;
+      }
+      if (provider === 'dingtalk' && isTest && ding && ding.has_secret && !cfg.config.secret) {
+        toast('该机器人使用加签，测试时请重新填写完整 Secret');
+        return;
+      }
+      if (provider === 'email' && (isTest || cfg.enabled) && !cfg.config.to) {
+        toast('请填写接收邮箱');
+        return;
+      }
       btn.disabled = true;
       const original = btn.textContent;
       btn.textContent = isTest ? '发送中…' : '保存中…';
@@ -261,6 +259,7 @@ async function draw(body) {
           // 记住共享间隔，供下次打开默认
           await setLocal(STORAGE_KEYS.NOTIFY_INTERVAL, cfg.notifyIntervalMinutes);
           toast('已保存');
+          await draw(body);
         }
       } catch (e) {
         toast(e.message || '操作失败');
@@ -270,4 +269,19 @@ async function draw(body) {
       }
     });
   });
+}
+
+function channelRuntimeStatus(channel, label) {
+  if (!channel || !channel.last_dispatch_status) return '';
+  if (channel.last_dispatch_status === 'failed') {
+    return `
+      <div class="cc98-error cc98-channel-status">
+        <div class="cc98-error-head">最近一次${esc(label)}提醒发送失败</div>
+        <div class="cc98-error-hint">${esc(channel.last_dispatch_error || '请检查渠道配置')}。失败批次不会自动补发。</div>
+      </div>`;
+  }
+  if (channel.last_sent_at) {
+    return `<div class="cc98-channel-status ok">最近发送成功：${esc(fmtTime(channel.last_sent_at))}</div>`;
+  }
+  return '';
 }

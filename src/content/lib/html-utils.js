@@ -39,25 +39,3 @@ export function fmtTime(s) {
     return String(s);
   }
 }
-
-// 通知投递状态中文映射
-export function deliveryStatusText(status) {
-  const map = {
-    pending: '待发送',
-    sent: '已发送',
-    failed: '发送失败',
-    skipped: '未配置渠道',
-  };
-  return map[status] || status || '未知';
-}
-
-// 通知投递状态颜色（用 CSS 变量，深色模式下自动换成高对比度的那一套）
-export function deliveryStatusColor(status) {
-  const map = {
-    pending: 'var(--cc98-warn)', // 棕
-    sent: 'var(--cc98-ok)',      // 绿
-    failed: 'var(--cc98-err)',   // 红
-    skipped: 'var(--cc98-txt3)', // 灰
-  };
-  return map[status] || 'var(--cc98-txt3)';
-}
