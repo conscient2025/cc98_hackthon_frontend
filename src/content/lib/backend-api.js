@@ -105,6 +105,13 @@ export async function saveChannel({ provider, enabled, notifyIntervalMinutes, co
   });
 }
 
+export async function setChannelEnabled(provider, enabled) {
+  return request('/api/v1/notification-channels/' + encodeURIComponent(provider), {
+    method: 'PATCH',
+    body: { enabled },
+  });
+}
+
 export async function testChannel({ provider, config }) {
   return request('/api/v1/notification-channels/test', {
     method: 'POST',

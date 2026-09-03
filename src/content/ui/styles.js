@@ -151,9 +151,7 @@ const CSS = `
 .cc98-setting-help{font-size:12px;line-height:1.65;color:var(--cc98-txt2);background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);padding:10px 12px}
 
 /* ============ 订阅表达式实时解析 ============ */
-.cc98-expression-meta{display:flex;justify-content:space-between;gap:12px;font-size:11px;line-height:1.55;color:var(--cc98-txt3);margin-bottom:8px}
-.cc98-expression-meta span:last-child{flex-shrink:0;font-variant-numeric:tabular-nums}
-.cc98-expression-meta span.invalid{color:var(--cc98-err);font-weight:650}
+.cc98-expression-meta{font-size:11px;line-height:1.55;color:var(--cc98-txt3);margin-bottom:8px}
 .cc98-expression-preview{font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg-sub);color:var(--cc98-txt2)}
 .cc98-expression-preview.valid{background:var(--cc98-ok-bg);color:var(--cc98-ok);border-color:transparent}
 .cc98-expression-preview.invalid{background:var(--cc98-err-bg);color:var(--cc98-err);border-color:var(--cc98-err-bd)}
@@ -319,6 +317,8 @@ const CSS = `
 .cc98-channel{border:1px solid var(--cc98-bd);border-radius:var(--cc98-rad-sm);padding:13px;margin-bottom:12px;background:var(--cc98-bg)}
 .cc98-channel .ch-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
 .cc98-channel .ch-title{font-size:13px;font-weight:650;color:var(--cc98-txt)}
+.cc98-channel-state{display:inline-flex;align-items:center;padding:3px 8px;border-radius:10px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd);color:var(--cc98-txt3);font-size:10px;font-weight:650}
+.cc98-channel-state.enabled{background:var(--cc98-ok-bg);border-color:transparent;color:var(--cc98-ok)}
 .cc98-channel-status{margin-top:10px;margin-bottom:0}
 .cc98-channel-status.ok{padding:8px 10px;border-radius:8px;background:var(--cc98-ok-bg);color:var(--cc98-ok);font-size:11px}
 
@@ -387,13 +387,13 @@ const CSS = `
 #cc98-ai-panel .cc98-chip.done{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-quota.warn{color:var(--cc98-warn)}
 #cc98-ai-panel .cc98-expression-preview.valid,
+#cc98-ai-panel .cc98-channel-state.enabled,
 #cc98-ai-panel .cc98-channel-status.ok{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-error,
 #cc98-ai-panel .cc98-error-detail summary,
 #cc98-ai-panel .cc98-error-detail pre,
 #cc98-ai-panel .cc98-sub .del,
-#cc98-ai-panel .cc98-expression-preview.invalid,
-#cc98-ai-panel .cc98-expression-meta span.invalid{color:var(--cc98-err)}
+#cc98-ai-panel .cc98-expression-preview.invalid{color:var(--cc98-err)}
 
 /* 输入框背景也要钉：站方给 input 设了浅底会和我们的浅字撞成白底白字 */
 #cc98-ai-panel .cc98-input,

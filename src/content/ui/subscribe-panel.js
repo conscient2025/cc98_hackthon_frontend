@@ -48,7 +48,7 @@ async function draw(body) {
 
   body.innerHTML = `
     <div class="cc98-quota${reachedLimit ? ' warn' : ''}">
-      订阅 ${subs.length} / ${policy.limit}（暂停也计数）
+      订阅 ${subs.length} / ${policy.limit}
     </div>
     <div class="cc98-setting-field">
       <label for="cc98-sub-expression">订阅表达式</label>
@@ -59,7 +59,6 @@ async function draw(body) {
       </div>
       <div class="cc98-expression-meta">
         <span>空格表示“且”，半角 / 表示“或”；其他相连字符按原样匹配。每个关键词至少 2 个字符。</span>
-        <span id="cc98-sub-count">0 / ${policy.maxLength}</span>
       </div>
       <div id="cc98-sub-preview" class="cc98-expression-preview neutral">
         输入后将在这里显示解析结果并检查语法。
@@ -71,14 +70,11 @@ async function draw(body) {
   const input = body.querySelector('#cc98-sub-expression');
   const addBtn = body.querySelector('#cc98-sub-add');
   const preview = body.querySelector('#cc98-sub-preview');
-  const count = body.querySelector('#cc98-sub-count');
   const listEl = body.querySelector('#cc98-sub-list');
   let parsed = null;
 
   function renderPreview() {
     parsed = parseSubscriptionExpression(input.value, policy.maxLength);
-    count.textContent = `${parsed.length || 0} / ${policy.maxLength}`;
-    count.classList.toggle('invalid', (parsed.length || 0) > policy.maxLength);
     addBtn.disabled = reachedLimit || !parsed.valid;
 
     if (!input.value.trim()) {
@@ -112,7 +108,7 @@ async function draw(body) {
         <div class="cc98-sub${subscription.status === 'paused' ? ' paused' : ''}" data-id="${subscription.id}">
           <div style="min-width:0">
             <div class="tn">${esc(subscription.expression)}</div>
-            <div class="tm">${subscription.status === 'paused' ? '已暂停 · 仍计入数量上限' : '正在匹配新帖'}</div>
+            <div class="tm">${subscription.status === 'paused' ? '已暂停' : '正在匹配新帖'}</div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button class="pause" type="button" data-act="pause">${subscription.status === 'enabled' ? '暂停' : '恢复'}</button>

@@ -1,7 +1,7 @@
 // ============================================================
 // 设置 Tab：登录 / 通知间隔 / 通知渠道（钉钉+邮箱）/ 后端状态
 // ============================================================
-import { listChannels, saveChannel, testChannel, getHealth } from '../lib/backend-api.js';
+import { getHealth, listChannels, saveChannel, setChannelEnabled, testChannel } from '../lib/backend-api.js';
 import { isLoggedIn, getEmail, logout, sendCode, verifyCode } from '../lib/auth.js';
 import { getLocal, setLocal } from '../lib/storage.js';
 import { STORAGE_KEYS, NOTIFY_INTERVAL_PRESETS, MSG } from '../../shared/constants.js';
@@ -135,7 +135,7 @@ async function draw(body) {
       <div class="cc98-channel">
         <div class="ch-head">
           <span class="ch-title">🔔 钉钉机器人</span>
-          <label class="cc98-setting-inline"><input id="cc98-ding-en" type="checkbox" ${ding && ding.enabled ? 'checked' : ''} /> 启用</label>
+          ${channelStateBadge(ding)}
         </div>
         <div class="cc98-setting-field" style="margin-bottom:8px">
           <label>Webhook 地址</label>
@@ -149,7 +149,8 @@ async function draw(body) {
                  placeholder="${ding && ding.has_secret ? '已保存；保存时可留空，测试时需重填' : 'SEC…'}" />
         </div>
         <div class="cc98-panel-actions" style="margin-bottom:0">
-          <button class="cc98-primary" type="button" data-save="dingtalk">保存</button>
+          <button class="cc98-primary" type="button" data-save="dingtalk">${ding ? '保存修改' : '保存并启用'}</button>
+          ${ding ? `<button class="cc98-secondary" type="button" data-toggle="dingtalk" data-enabled="${ding.enabled ? 'false' : 'true'}">${ding.enabled ? '停用' : '启用'}</button>` : ''}
           <button class="cc98-secondary" type="button" data-test="dingtalk">发送测试（不保存）</button>
         </div>
         ${channelRuntimeStatus(ding, '钉钉')}
@@ -158,7 +159,7 @@ async function draw(body) {
       <div class="cc98-channel">
         <div class="ch-head">
           <span class="ch-title">✉️ 邮箱通知</span>
-          <label class="cc98-setting-inline"><input id="cc98-mail-en" type="checkbox" ${mail && mail.enabled ? 'checked' : ''} /> 启用</label>
+          ${channelStateBadge(mail)}
         </div>
         <div class="cc98-setting-field" style="margin-bottom:8px">
           <label>接收邮箱</label>
@@ -171,7 +172,8 @@ async function draw(body) {
                  value="${esc((mail && mail.config && mail.config.subject_prefix) || '')}" />
         </div>
         <div class="cc98-panel-actions" style="margin-bottom:0">
-          <button class="cc98-primary" type="button" data-save="email">保存</button>
+          <button class="cc98-primary" type="button" data-save="email">${mail ? '保存修改' : '保存并启用'}</button>
+          ${mail ? `<button class="cc98-secondary" type="button" data-toggle="email" data-enabled="${mail.enabled ? 'false' : 'true'}">${mail.enabled ? '停用' : '启用'}</button>` : ''}
           <button class="cc98-secondary" type="button" data-test="email">发送测试（不保存）</button>
         </div>
         ${channelRuntimeStatus(mail, '邮箱')}
@@ -204,23 +206,24 @@ async function draw(body) {
   });
 
   // 读取各渠道表单
-  function dingConfig(forTest) {
+  function dingConfig() {
     const secretInput = body.querySelector('#cc98-ding-secret');
     const secret = secretInput.value.trim();
+    const webhook = body.querySelector('#cc98-ding-webhook').value.trim();
+    const config = {};
+    if (webhook) config.webhook = webhook;
+    if (secret) config.secret = secret;
     return {
       provider: 'dingtalk',
-      enabled: body.querySelector('#cc98-ding-en').checked,
+      enabled: ding ? ding.enabled : true,
       notifyIntervalMinutes: Number(body.querySelector('#cc98-interval').value),
-      config: {
-        webhook: body.querySelector('#cc98-ding-webhook').value.trim(),
-        secret: secret || (!forTest && ding && ding.has_secret ? '***' : ''),
-      },
+      config,
     };
   }
   function mailConfig() {
     return {
       provider: 'email',
-      enabled: body.querySelector('#cc98-mail-en').checked,
+      enabled: mail ? mail.enabled : true,
       notifyIntervalMinutes: Number(body.querySelector('#cc98-interval').value),
       config: {
         to: body.querySelector('#cc98-mail-to').value.trim(),
@@ -234,16 +237,16 @@ async function draw(body) {
     btn.addEventListener('click', async () => {
       const provider = btn.dataset.save || btn.dataset.test;
       const isTest = !!btn.dataset.test;
-      const cfg = provider === 'dingtalk' ? dingConfig(isTest) : mailConfig();
-      if (provider === 'dingtalk' && !cfg.config.webhook) {
-        toast('请填写完整的钉钉 Webhook 地址');
+      const cfg = provider === 'dingtalk' ? dingConfig() : mailConfig();
+      if (provider === 'dingtalk' && (isTest || !ding) && !cfg.config.webhook) {
+        toast(isTest ? '测试时请填写完整的钉钉 Webhook 地址' : '请填写完整的钉钉 Webhook 地址');
         return;
       }
       if (provider === 'dingtalk' && isTest && ding && ding.has_secret && !cfg.config.secret) {
         toast('该机器人使用加签，测试时请重新填写完整 Secret');
         return;
       }
-      if (provider === 'email' && (isTest || cfg.enabled) && !cfg.config.to) {
+      if (provider === 'email' && !cfg.config.to) {
         toast('请填写接收邮箱');
         return;
       }
@@ -269,6 +272,37 @@ async function draw(body) {
       }
     });
   });
+
+  body.querySelectorAll('[data-toggle]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const provider = btn.dataset.toggle;
+      const enabled = btn.dataset.enabled === 'true';
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = enabled ? '启用中…' : '停用中…';
+      try {
+        await setChannelEnabled(provider, enabled);
+        const channel = provider === 'dingtalk' ? ding : mail;
+        if (channel) channel.enabled = enabled;
+        const badge = btn.closest('.cc98-channel').querySelector('.cc98-channel-state');
+        badge.classList.toggle('enabled', enabled);
+        badge.textContent = enabled ? '已启用' : '未启用';
+        btn.dataset.enabled = String(!enabled);
+        btn.textContent = enabled ? '停用' : '启用';
+        btn.disabled = false;
+        toast(enabled ? '渠道已启用' : '渠道已停用');
+      } catch (e) {
+        toast(e.message || '操作失败');
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    });
+  });
+}
+
+function channelStateBadge(channel) {
+  if (!channel) return '<span class="cc98-channel-state">未配置</span>';
+  return `<span class="cc98-channel-state ${channel.enabled ? 'enabled' : ''}">${channel.enabled ? '已启用' : '未启用'}</span>`;
 }
 
 function channelRuntimeStatus(channel, label) {
