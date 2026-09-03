@@ -10,7 +10,7 @@ import { AppError, ERROR_TYPES } from './errors.js';
 export async function callLLM({ system, user, temperature, maxTokens }) {
   const cfg = await getLLMConfig();
   if (!cfg.apiKey) {
-    throw new AppError(ERROR_TYPES.LLM_API_KEY_INVALID, '未配置 LLM API Key，请到设置页填写');
+    throw new AppError(ERROR_TYPES.LLM_API_KEY_INVALID, '还未填写 AI 密钥，请到设置页完成设置');
   }
 
   const isAnthropic = cfg.provider === 'anthropic';
@@ -53,11 +53,11 @@ export async function callLLM({ system, user, temperature, maxTokens }) {
   } catch (err) {
     // 网络层错误已在 net.js 里标记 status；这里补一层 LLM 网络提示
     if (!err || !err.status) {
-      throw new AppError(ERROR_TYPES.LLM_NETWORK, '无法连接 LLM 服务', err && err.message);
+      throw new AppError(ERROR_TYPES.LLM_NETWORK, '无法连接 AI 服务', err && err.message);
     }
     // 明确标记来源，避免和 CC98 的 401 混为一谈
     if (err.status === 401) {
-      throw new AppError(ERROR_TYPES.LLM_API_KEY_INVALID, 'LLM 服务拒绝了这个 API Key', err.detail || err.message);
+      throw new AppError(ERROR_TYPES.LLM_API_KEY_INVALID, 'AI 服务不接受这个密钥，请检查是否填写正确', err.detail || err.message);
     }
     throw err;
   }
@@ -72,7 +72,7 @@ function extractText(data, isAnthropic) {
       if (text) return text;
     }
     if (data && data.stop_reason === 'max_tokens') {
-      throw new AppError(ERROR_TYPES.OUTPUT_TRUNCATED, '模型输出被 Max Tokens 截断，正文为空');
+      throw new AppError(ERROR_TYPES.OUTPUT_TRUNCATED, '模型输出被截断，正文为空');
     }
   } else if (data && Array.isArray(data.choices) && data.choices.length) {
     const choice = data.choices[0];
@@ -80,12 +80,12 @@ function extractText(data, isAnthropic) {
     if (msg.content) return msg.content;
 
     // 推理模型（deepseek-reasoner / deepseek-v4-pro 等）会先输出思维链 reasoning_content，
-    // 再输出正文 content。Max Tokens 不够时思维链占满额度，content 就是空字符串。
+    // 再输出正文 content。输出额度不足时思维链可能占满额度，content 就是空字符串。
     const reasoningLen = String(msg.reasoning_content || '').length;
     if (choice.finish_reason === 'length') {
       throw new AppError(
         ERROR_TYPES.OUTPUT_TRUNCATED,
-        '模型输出被 Max Tokens 截断，正文为空',
+        '模型输出被截断，正文为空',
         reasoningLen
           ? `这是推理模型，思维链吃掉了全部额度（reasoning ${reasoningLen} 字符，content 0 字符）`
           : '输出长度不足，未能产生正文'

@@ -1,8 +1,8 @@
 // ============================================================
-// 后台 Service Worker：通用 fetch 代理 + 未读徽章轮询
-//   所有跨域请求（CC98 API / LLM / Watch 后端）经这里转发，绕过 CORS
+// 后台 Service Worker：通用 fetch 代理 + 工具栏徽章同步
+//   所有跨域请求（CC98 API / AI 服务 / 订阅提醒服务）经这里转发，绕过 CORS
 // ============================================================
-import { MSG, STORAGE_KEYS, BACKEND_DEFAULT_BASE } from '../shared/constants.js';
+import { MSG } from '../shared/constants.js';
 
 const BADGE_ALARM = 'badge-poll';
 
@@ -18,16 +18,24 @@ function allowSessionStorageInContentScripts() {
 
 allowSessionStorageInContentScripts();
 
-// ---------- 安装 / 启动：建立徽章轮询 ----------
+// 新版不再后台读取通知。升级后显式清除旧版本留下的周期任务。
+function clearLegacyBadgePolling() {
+  chrome.alarms.clear(BADGE_ALARM).catch(() => {});
+}
+
+clearLegacyBadgePolling();
+
 chrome.runtime.onInstalled.addListener(() => {
   allowSessionStorageInContentScripts();
-  chrome.alarms.create(BADGE_ALARM, { periodInMinutes: 5 });
+  clearLegacyBadgePolling();
   chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+  chrome.action.setBadgeText({ text: '' });
 });
 
 chrome.runtime.onStartup.addListener(() => {
   allowSessionStorageInContentScripts();
-  chrome.alarms.create(BADGE_ALARM, { periodInMinutes: 5 });
+  clearLegacyBadgePolling();
+  chrome.action.setBadgeText({ text: '' });
 });
 
 // ---------- 消息：通用 fetch 代理 ----------
@@ -38,9 +46,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       .catch((e) => sendResponse({ ok: false, status: 0, data: { detail: e && e.message ? e.message : String(e) } }));
     return true; // 保持异步 sendResponse 有效
   }
-  if (msg && msg.type === MSG.OPEN_OPTIONS) {
-    chrome.runtime.openOptionsPage().catch(() => {});
+  if (msg && msg.type === MSG.SET_BADGE) {
+    const count = Math.max(0, Number(msg.count) || 0);
+    chrome.action.setBadgeText({ text: count ? (count > 99 ? '99+' : String(count)) : '' });
     return false;
+  }
+  if (msg && msg.type === MSG.OPEN_OPTIONS) {
+    chrome.runtime.openOptionsPage()
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) => sendResponse({ ok: false, error: error && error.message ? error.message : String(error) }));
+    return true;
   }
   return false;
 });
@@ -60,38 +75,11 @@ async function handleFetch(url, options = {}) {
     } catch (_) {
       data = text; // 非 JSON 响应，原样返回字符串
     }
-    return { ok: res.ok, status: res.status, data };
+    const headers = {};
+    const retryAfter = res.headers.get('retry-after');
+    if (retryAfter) headers['retry-after'] = retryAfter;
+    return { ok: res.ok, status: res.status, data, headers };
   } catch (e) {
     return { ok: false, status: 0, data: { detail: e && e.message ? e.message : String(e) } };
-  }
-}
-
-// ---------- 徽章轮询：查询未读通知数 ----------
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === BADGE_ALARM) refreshBadge();
-});
-
-async function refreshBadge() {
-  const stored = await chrome.storage.local.get([STORAGE_KEYS.USER_EMAIL, STORAGE_KEYS.BACKEND_BASE, STORAGE_KEYS.AUTH_TOKEN]);
-  const email = stored[STORAGE_KEYS.USER_EMAIL];
-  const token = stored[STORAGE_KEYS.AUTH_TOKEN];
-  const base = (stored[STORAGE_KEYS.BACKEND_BASE] || BACKEND_DEFAULT_BASE).replace(/\/+$/, '');
-
-  if (!email || !token) {
-    chrome.action.setBadgeText({ text: '' });
-    return;
-  }
-
-  try {
-    // 新后端要求 JWT：通知接口以 token 识别用户，user_id 查询参数已被后端忽略
-    const res = await fetch(`${base}/api/v1/notifications`, {
-      headers: { Authorization: 'Bearer ' + token },
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const list = await res.json();
-    const unread = Array.isArray(list) ? list.filter((n) => !n.is_read).length : 0;
-    chrome.action.setBadgeText({ text: unread ? String(Math.min(unread, 99)) : '' });
-  } catch (e) {
-    chrome.action.setBadgeText({ text: '' });
   }
 }

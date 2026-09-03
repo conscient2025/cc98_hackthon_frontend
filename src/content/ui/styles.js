@@ -145,10 +145,18 @@ const CSS = `
 .cc98-panel-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .cc98-setting-field{margin-bottom:16px}
 .cc98-setting-field label{display:block;font-size:11px;font-weight:650;color:var(--cc98-txt2);margin-bottom:6px;letter-spacing:.3px;text-transform:none}
-.cc98-setting-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cc98-setting-inline label{display:flex;align-items:center;gap:7px;color:var(--cc98-txt);font-size:13px;font-weight:500;margin:0;letter-spacing:0}
-.cc98-setting-inline input[type=checkbox]{accent-color:var(--cc98-pri);width:15px;height:15px;cursor:pointer}
 .cc98-setting-help{font-size:12px;line-height:1.65;color:var(--cc98-txt2);background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);padding:10px 12px}
+
+/* ============ 订阅表达式实时解析 ============ */
+.cc98-expression-meta{font-size:11px;line-height:1.55;color:var(--cc98-txt3);margin-bottom:8px}
+.cc98-expression-preview{font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg-sub);color:var(--cc98-txt2)}
+.cc98-expression-preview.valid{background:var(--cc98-ok-bg);color:var(--cc98-ok);border-color:transparent}
+.cc98-expression-preview.invalid{background:var(--cc98-err-bg);color:var(--cc98-err);border-color:var(--cc98-err-bd)}
+.cc98-expression-state{font-weight:650;margin-right:9px}
+.cc98-expression-groups{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px}
+.cc98-expression-groups>i{font-style:normal;font-weight:650;color:var(--cc98-txt2)}
+.cc98-expression-group{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:8px;background:var(--cc98-bg);border:1px solid var(--cc98-pri-bd)}
+.cc98-expression-group b{font-size:10px;color:var(--cc98-txt3)}
 
 /* ============ 结果元信息（上次搜索 + 清空） ============ */
 .cc98-result-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--cc98-txt3);margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--cc98-bd-soft)}
@@ -294,14 +302,23 @@ const CSS = `
 .cc98-notif .nt a:hover{text-decoration:underline}
 .cc98-notif .nm{font-size:11px;color:var(--cc98-txt3);margin-top:4px;line-height:1.55}
 .cc98-notif.unread{background:var(--cc98-pri-soft);margin:0 -16px;padding:11px 16px 11px 13px;border-left:3px solid var(--cc98-pri)}
+.cc98-notif-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--cc98-bd-soft);font-size:11px;color:var(--cc98-txt3)}
+.cc98-notif-toolbar .cc98-secondary{padding:6px 10px;font-size:11px}
+.cc98-notif-new{margin:8px 0;padding:7px 10px;border-radius:8px;background:var(--cc98-pri-soft);color:var(--cc98-pri);font-size:12px;font-weight:600}
+.cc98-channel-alert{margin-top:0}
 
-/* ============ 登录 / 配额 / 渠道 ============ */
-.cc98-login-hint{font-size:12px;color:var(--cc98-txt2);line-height:1.7;margin-bottom:14px;padding:11px 12px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm)}
+/* ============ 配额 / 统一设置入口 ============ */
 .cc98-quota{display:inline-block;font-size:11px;padding:3px 10px;border-radius:11px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd);color:var(--cc98-txt2);margin-bottom:14px;font-weight:500}
 .cc98-quota.warn{background:var(--cc98-warn-bg);color:var(--cc98-warn);border-color:transparent}
-.cc98-channel{border:1px solid var(--cc98-bd);border-radius:var(--cc98-rad-sm);padding:13px;margin-bottom:12px;background:var(--cc98-bg)}
-.cc98-channel .ch-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-.cc98-channel .ch-title{font-size:13px;font-weight:650;color:var(--cc98-txt)}
+.cc98-settings-intro{font-size:12px;line-height:1.7;color:var(--cc98-txt2);margin-bottom:13px}
+.cc98-settings-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cc98-settings-feature{min-width:0;padding:13px;border:1px solid var(--cc98-bd);border-top:3px solid var(--cc98-pri);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg)}
+.cc98-settings-feature .feature-name{font-size:13px;font-weight:700;color:var(--cc98-txt);margin-bottom:5px}
+.cc98-settings-feature .feature-desc{font-size:11px;line-height:1.55;color:var(--cc98-txt2);min-height:34px}
+.cc98-settings-feature .feature-status{font-size:10px;font-weight:650;color:var(--cc98-txt3);margin-top:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
+.cc98-settings-security{margin-bottom:13px}
+@media (max-width:420px){.cc98-settings-features{grid-template-columns:1fr}}
 
 /* ============ 防站方样式污染：文字色兜底 ============
    面板注入在 CC98 页面里，共享同一份层叠上下文。上面那些 .cc98-xxx 规则
@@ -319,14 +336,13 @@ const CSS = `
 #cc98-ai-panel .cc98-select,
 #cc98-ai-panel .cc98-textarea,
 #cc98-ai-panel .cc98-secondary,
-#cc98-ai-panel .cc98-setting-inline label,
 #cc98-ai-panel .cc98-progress-stage,
 #cc98-ai-panel .cc98-src,
 #cc98-ai-panel .cc98-src-title,
 #cc98-ai-panel .cc98-empty-title,
 #cc98-ai-panel .cc98-sub .tn,
 #cc98-ai-panel .cc98-notif .nt,
-#cc98-ai-panel .cc98-channel .ch-title{color:var(--cc98-txt)}
+#cc98-ai-panel .cc98-settings-feature .feature-name{color:var(--cc98-txt)}
 
 #cc98-ai-panel .cc98-panel-close,
 #cc98-ai-panel .cc98-tab,
@@ -335,9 +351,10 @@ const CSS = `
 #cc98-ai-panel .cc98-empty,
 #cc98-ai-panel .cc98-empty-sub,
 #cc98-ai-panel .cc98-loading,
-#cc98-ai-panel .cc98-login-hint,
 #cc98-ai-panel .cc98-quota,
-#cc98-ai-panel .cc98-sub .pause{color:var(--cc98-txt2)}
+#cc98-ai-panel .cc98-sub .pause,
+#cc98-ai-panel .cc98-settings-intro,
+#cc98-ai-panel .cc98-settings-feature .feature-desc{color:var(--cc98-txt2)}
 
 #cc98-ai-panel .cc98-chip,
 #cc98-ai-panel .cc98-keywords-label,
@@ -346,7 +363,12 @@ const CSS = `
 #cc98-ai-panel .cc98-result-meta,
 #cc98-ai-panel .cc98-sub .tm,
 #cc98-ai-panel .cc98-sub.paused .tn,
-#cc98-ai-panel .cc98-notif .nm{color:var(--cc98-txt3)}
+#cc98-ai-panel .cc98-notif .nm,
+#cc98-ai-panel .cc98-settings-feature .feature-status{color:var(--cc98-txt3)}
+
+#cc98-ai-panel .cc98-expression-meta,
+#cc98-ai-panel .cc98-expression-preview.neutral,
+#cc98-ai-panel .cc98-notif-toolbar{color:var(--cc98-txt3)}
 
 #cc98-ai-panel .cc98-tab.active,
 #cc98-ai-panel .cc98-link-btn,
@@ -363,10 +385,13 @@ const CSS = `
 
 #cc98-ai-panel .cc98-chip.done{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-quota.warn{color:var(--cc98-warn)}
+#cc98-ai-panel .cc98-expression-preview.valid,
+#cc98-ai-panel .cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-error,
 #cc98-ai-panel .cc98-error-detail summary,
 #cc98-ai-panel .cc98-error-detail pre,
-#cc98-ai-panel .cc98-sub .del{color:var(--cc98-err)}
+#cc98-ai-panel .cc98-sub .del,
+#cc98-ai-panel .cc98-expression-preview.invalid{color:var(--cc98-err)}
 
 /* 输入框背景也要钉：站方给 input 设了浅底会和我们的浅字撞成白底白字 */
 #cc98-ai-panel .cc98-input,

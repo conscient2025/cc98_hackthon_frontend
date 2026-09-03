@@ -79,7 +79,7 @@ async function boot() {
     refreshAuth();
   } catch (e) { /* ignore */ }
 
-  // 快捷键：Ctrl+Shift+K 搜索，Ctrl+Shift+N 通知（只挂一次）
+  // 快捷键：Ctrl+Shift+K 打开搜索（只挂一次）
   document.addEventListener('keydown', (e) => {
     if (!e.ctrlKey || !e.shiftKey || e.altKey || e.metaKey) return;
     const k = (e.key || '').toLowerCase();
@@ -89,10 +89,6 @@ async function boot() {
       e.preventDefault();
       p.open();
       p.setActiveTab('search');
-    } else if (k === 'n') {
-      e.preventDefault();
-      p.open();
-      p.setActiveTab('notif');
     }
   });
 

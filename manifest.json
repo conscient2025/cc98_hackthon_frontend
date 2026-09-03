@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "CC98 AI+",
-  "version": "0.1.0",
-  "description": "CC98 论坛 AI 搜索总结 + 订阅新帖提醒（钉钉 / 邮箱）。CC98 Token 和 LLM API Key 只在本机使用，不上传。",
+  "version": "0.2.0",
+  "description": "CC98 论坛 AI 搜索总结 + 订阅新帖提醒（钉钉 / 邮箱）。CC98 登录信息和 AI 密钥只保存在本机。",
+  "icons": {
+    "16": "src/assets/icons/icon-16.png",
+    "32": "src/assets/icons/icon-32.png",
+    "48": "src/assets/icons/icon-48.png",
+    "128": "src/assets/icons/icon-128.png"
+  },
   "permissions": ["storage", "alarms"],
   "host_permissions": [
     "https://api.cc98.org/*",
@@ -19,7 +25,11 @@
   },
   "action": {
     "default_popup": "src/pages/popup/popup.html",
-    "default_title": "CC98 AI+"
+    "default_title": "CC98 AI+",
+    "default_icon": {
+      "16": "src/assets/icons/icon-16.png",
+      "32": "src/assets/icons/icon-32.png"
+    }
   },
   "options_page": "src/pages/options/options.html",
   "content_scripts": [

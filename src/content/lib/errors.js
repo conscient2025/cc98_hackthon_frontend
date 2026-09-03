@@ -61,13 +61,13 @@ function _classify(err) {
 
   // LLM 相关
   if (/401|unauthorized|invalid.*key|api key/i.test(msg) || status === 401) {
-    return { type: ERROR_TYPES.LLM_API_KEY_INVALID, message: 'API Key 无效或未配置', hint: hintFor(ERROR_TYPES.LLM_API_KEY_INVALID) };
+    return { type: ERROR_TYPES.LLM_API_KEY_INVALID, message: 'AI 密钥无效或还未填写', hint: hintFor(ERROR_TYPES.LLM_API_KEY_INVALID) };
   }
   if (/quota|insufficient|余额|insufficient_quota|billing|402|429/i.test(msg) || status === 402 || status === 429) {
     return { type: ERROR_TYPES.LLM_QUOTA_EXHAUSTED, message: '额度不足或请求过于频繁', hint: hintFor(ERROR_TYPES.LLM_QUOTA_EXHAUSTED) };
   }
   if (/context|maximum context|too many tokens|token.*limit/i.test(msg)) {
-    return { type: ERROR_TYPES.CONTEXT_OVERFLOW, message: '上下文超出模型上限', hint: hintFor(ERROR_TYPES.CONTEXT_OVERFLOW) };
+    return { type: ERROR_TYPES.CONTEXT_OVERFLOW, message: '要交给 AI 的内容太多了', hint: hintFor(ERROR_TYPES.CONTEXT_OVERFLOW) };
   }
 
   // CC98 相关
@@ -93,21 +93,21 @@ function hintFor(type) {
     case ERROR_TYPES.CC98_API_FAILED:
       return '请确认已连接校园网 / RVPN，并已在 cc98.org 登录。';
     case ERROR_TYPES.LLM_API_KEY_INVALID:
-      return '请到插件设置页检查 API Key 和 Base URL。';
+      return '请到插件设置页检查 AI 密钥和 API 地址。';
     case ERROR_TYPES.LLM_QUOTA_EXHAUSTED:
       return '请检查模型供应商账户余额，或稍后再试。';
     case ERROR_TYPES.LLM_NETWORK:
-      return '无法连接 LLM 服务，请检查网络或 Base URL。';
+      return '无法连接 AI 服务，请检查网络或设置页中的 API 地址。';
     case ERROR_TYPES.CONTEXT_OVERFLOW:
       return '请减少搜索预算（关键词数 / 回复数）后重试。';
     case ERROR_TYPES.OUTPUT_TRUNCATED:
-      return '把设置页的 Max Tokens 调大（建议 8192 以上），或换用非推理模型（如 deepseek-chat）——推理模型的思维链会占掉大量额度。';
+      return '请缩小搜索范围后重试，或换用输出能力更稳定的模型。';
     case ERROR_TYPES.MODEL_FORMAT_ERROR:
-      return '模型返回格式异常，请重试，或更换更稳定的模型。';
+      return 'AI 返回的内容格式不正确，请重试或更换模型。';
     case ERROR_TYPES.NO_RESULTS:
       return '换个更宽泛的关键词试试。';
     case ERROR_TYPES.BACKEND_OFFLINE:
-      return '请确认后端已启动，或在设置页检查后端地址。';
+      return '订阅提醒服务暂时无法连接，请稍后再试。';
     case ERROR_TYPES.NOT_LOGGED_IN_BACKEND:
       return '请先用浙大邮箱登录。';
     default:
