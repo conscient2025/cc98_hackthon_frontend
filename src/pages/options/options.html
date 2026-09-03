@@ -26,9 +26,21 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.5}
-    .wrap{max-width:760px;margin:0 auto;padding:36px 24px 80px}
+    .wrap{max-width:1160px;margin:0 auto;padding:36px 24px 80px}
     h1{font-size:22px;font-weight:650;margin:0 0 5px;letter-spacing:.2px}
-    .sub{font-size:13px;color:var(--txt2);margin-bottom:26px}
+    .sub{font-size:13px;color:var(--txt2);margin-bottom:18px}
+    .security{background:var(--pri-soft);border:1px solid var(--pri-bd);border-radius:14px;padding:15px 18px;margin-bottom:20px}
+    .security-title{font-size:13px;font-weight:700;color:var(--pri);margin-bottom:8px}
+    .security-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px}
+    .security-item{font-size:12px;line-height:1.65;color:var(--txt2)}
+    .security-item strong{display:block;color:var(--txt);margin-bottom:2px}
+    .feature-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+    .feature-column{min-width:0}
+    .feature-head{min-height:112px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;margin-bottom:14px;background:var(--card);border:1px solid var(--bd);border-top:4px solid var(--pri);border-radius:14px;box-shadow:var(--sh)}
+    .feature-index{font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--pri);margin-bottom:3px}
+    .feature-head h2{font-size:18px;line-height:1.3;margin:0 0 5px}
+    .feature-head p{font-size:12px;line-height:1.6;color:var(--txt2);margin:0}
+    .feature-badge{flex-shrink:0;padding:4px 9px;border-radius:12px;background:var(--pri-soft);color:var(--pri);font-size:10px;font-weight:700}
     .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--sh)}
     .card h2{font-size:14px;font-weight:650;margin:0 0 4px;letter-spacing:.2px}
     .card-sub{font-size:12px;color:var(--txt3);margin:0 0 18px}
@@ -61,14 +73,52 @@
     .status.error{color:var(--err)}
     .status.pending{color:var(--txt2)}
     .hint{font-size:12px;color:var(--txt2);line-height:1.65;margin-top:6px}
+    .account-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;margin-bottom:16px;border:1px solid var(--bd-soft);border-radius:9px;background:var(--bg);font-size:12px}
+    .account-email{font-weight:650;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .channel{padding:14px;margin-top:14px;border:1px solid var(--bd);border-radius:11px;background:var(--card)}
+    .channel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .channel-title{font-size:13px;font-weight:700;color:var(--txt)}
+    .channel-state{padding:3px 8px;border:1px solid var(--bd);border-radius:11px;color:var(--txt3);background:var(--bg);font-size:10px;font-weight:700}
+    .channel-state.enabled{color:var(--ok);border-color:transparent;background:color-mix(in srgb,var(--ok) 12%,transparent)}
+    .runtime{font-size:11px;line-height:1.55;color:var(--txt3);margin-top:10px}
+    .runtime.ok{color:var(--ok)}
+    .runtime.error{padding:9px 10px;border:1px solid var(--err-bd);border-radius:8px;background:var(--err-bg);color:var(--err)}
+    .backend-status{margin-top:16px;padding:10px 12px;border:1px solid var(--bd-soft);border-radius:9px;background:var(--bg);font-size:11px;color:var(--txt2)}
+    .backend-status.error{border-color:var(--err-bd);background:var(--err-bg);color:var(--err)}
     [hidden]{display:none!important}
-    @media (max-width:620px){.row{display:block}.wrap{padding:20px 14px 60px}.card{padding:18px}}
+    @media (max-width:900px){.feature-grid,.security-grid{grid-template-columns:1fr}.feature-head{min-height:0}}
+    @media (max-width:620px){.row{display:block}.wrap{padding:20px 14px 60px}.card{padding:18px}.feature-head{padding:16px}.actions .btn{flex:1}.account-bar{align-items:flex-start;flex-direction:column}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>CC98 AI+ 设置</h1>
-    <div class="sub">先连接一个 AI 服务，再按需要调整搜索范围。订阅登录和通知渠道在 CC98 页面内的插件面板中设置。</div>
+    <div class="sub">AI 搜索与订阅通知是两个并列、互不依赖的功能。你可以只配置其中一个，也可以同时使用。</div>
+
+    <div class="security">
+      <div class="security-title">数据与安全边界</div>
+      <div class="security-grid">
+        <div class="security-item">
+          <strong>AI 搜索</strong>
+          API Key 保存在浏览器扩展本地存储中（不是操作系统密钥库），只会发往你选择的 AI API 地址。执行搜索时，待总结的论坛内容也会发往该 AI 服务。
+        </div>
+        <div class="security-item">
+          <strong>订阅通知</strong>
+          登录令牌保存在浏览器本地；订阅表达式和渠道配置会存入 Watch 后端用于匹配与投递，钉钉 Webhook 与 Secret 不会回传明文。Watch 后端不会收到 LLM API Key，也不会调用 AI 服务。
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <section class="feature-column" aria-labelledby="aiFeatureTitle">
+        <div class="feature-head">
+          <div>
+            <div class="feature-index">功能一</div>
+            <h2 id="aiFeatureTitle">AI 搜索</h2>
+            <p>在当前浏览器中搜索、阅读并总结 CC98 帖子，不需要登录 Watch 或配置通知渠道。</p>
+          </div>
+          <span class="feature-badge">可独立使用</span>
+        </div>
 
     <div class="card">
       <h2>AI 服务</h2>
@@ -154,6 +204,109 @@
         <button class="btn btn-danger" id="resetBudget" type="button">恢复默认</button>
         <span class="status" id="budgetStatus" aria-live="polite"></span>
       </div>
+    </div>
+
+      </section>
+
+      <section class="feature-column" aria-labelledby="watchFeatureTitle">
+        <div class="feature-head">
+          <div>
+            <div class="feature-index">功能二</div>
+            <h2 id="watchFeatureTitle">订阅通知</h2>
+            <p>由 Watch 后端扫描新帖并推送到通知渠道，不需要配置 AI 服务或 LLM API Key。</p>
+          </div>
+          <span class="feature-badge">可独立使用</span>
+        </div>
+
+        <div class="card">
+          <h2>账号与通知渠道</h2>
+          <div class="card-sub">使用浙大邮箱登录后，配置通知间隔以及钉钉或邮箱渠道。</div>
+
+          <div id="watchLoggedOut">
+            <div class="field">
+              <label for="watchEmail">浙大邮箱</label>
+              <input id="watchEmail" type="email" placeholder="student@zju.edu.cn" autocomplete="email" />
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" id="sendWatchCode" type="button">发送验证码</button>
+              <span class="status" id="watchLoginStatus" aria-live="polite"></span>
+            </div>
+            <div id="watchCodeStep" hidden>
+              <div class="field" style="margin-top:14px">
+                <label for="watchCode">邮箱验证码</label>
+                <input id="watchCode" type="text" inputmode="numeric" placeholder="6 位验证码" autocomplete="one-time-code" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="verifyWatchCode" type="button">验证并登录</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="watchLoggedIn" hidden>
+            <div class="account-bar">
+              <div>Watch 账号：<span class="account-email" id="watchAccountEmail"></span></div>
+              <button class="btn btn-ghost" id="logoutWatch" type="button">退出登录</button>
+            </div>
+
+            <div class="field">
+              <label for="notifyInterval">通知间隔（攒一批发）</label>
+              <select id="notifyInterval"></select>
+              <div class="hint">扫描固定每 10 分钟一次；命中的新帖会先积累，到所选间隔再合并推送。</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-ghost" id="saveNotifyInterval" type="button">保存通知间隔</button>
+              <span class="status" id="intervalStatus" aria-live="polite"></span>
+            </div>
+
+            <div class="channel" data-provider="dingtalk">
+              <div class="channel-head">
+                <span class="channel-title">钉钉机器人</span>
+                <span class="channel-state" id="dingtalkState">未配置</span>
+              </div>
+              <div class="field">
+                <label for="dingtalkWebhook">Webhook 地址</label>
+                <input id="dingtalkWebhook" type="password" placeholder="https://oapi.dingtalk.com/robot/send?access_token=…" autocomplete="off" spellcheck="false" />
+                <div class="hint" id="dingtalkWebhookHint" hidden>Webhook 已存入 Watch 后端且不会回传完整内容；保存修改时可留空，测试时需重新粘贴。</div>
+              </div>
+              <div class="field">
+                <label for="dingtalkSecret">加签 Secret</label>
+                <input id="dingtalkSecret" type="password" placeholder="SEC…" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="saveDingtalk" type="button">保存并启用</button>
+                <button class="btn btn-ghost" id="toggleDingtalk" type="button" hidden>停用</button>
+                <button class="btn btn-ghost" id="testDingtalk" type="button">发送测试（不保存）</button>
+                <span class="status" id="dingtalkStatus" aria-live="polite"></span>
+              </div>
+              <div class="runtime" id="dingtalkRuntime"></div>
+            </div>
+
+            <div class="channel" data-provider="email">
+              <div class="channel-head">
+                <span class="channel-title">邮箱通知</span>
+                <span class="channel-state" id="emailState">未配置</span>
+              </div>
+              <div class="field">
+                <label for="notificationEmail">接收邮箱</label>
+                <input id="notificationEmail" type="email" placeholder="student@zju.edu.cn" autocomplete="email" />
+              </div>
+              <div class="field">
+                <label for="emailSubjectPrefix">主题前缀</label>
+                <input id="emailSubjectPrefix" type="text" placeholder="CC98 订阅提醒" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="saveEmailChannel" type="button">保存并启用</button>
+                <button class="btn btn-ghost" id="toggleEmailChannel" type="button" hidden>停用</button>
+                <button class="btn btn-ghost" id="testEmailChannel" type="button">发送测试（不保存）</button>
+                <span class="status" id="emailChannelStatus" aria-live="polite"></span>
+              </div>
+              <div class="runtime" id="emailRuntime"></div>
+            </div>
+          </div>
+
+          <div class="backend-status" id="watchBackendStatus">正在检测 Watch 后端…</div>
+        </div>
+      </section>
     </div>
   </div>
 

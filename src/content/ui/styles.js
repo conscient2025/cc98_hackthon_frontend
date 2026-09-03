@@ -145,9 +145,6 @@ const CSS = `
 .cc98-panel-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .cc98-setting-field{margin-bottom:16px}
 .cc98-setting-field label{display:block;font-size:11px;font-weight:650;color:var(--cc98-txt2);margin-bottom:6px;letter-spacing:.3px;text-transform:none}
-.cc98-setting-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.cc98-setting-inline label{display:flex;align-items:center;gap:7px;color:var(--cc98-txt);font-size:13px;font-weight:500;margin:0;letter-spacing:0}
-.cc98-setting-inline input[type=checkbox]{accent-color:var(--cc98-pri);width:15px;height:15px;cursor:pointer}
 .cc98-setting-help{font-size:12px;line-height:1.65;color:var(--cc98-txt2);background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm);padding:10px 12px}
 
 /* ============ 订阅表达式实时解析 ============ */
@@ -310,17 +307,18 @@ const CSS = `
 .cc98-notif-new{margin:8px 0;padding:7px 10px;border-radius:8px;background:var(--cc98-pri-soft);color:var(--cc98-pri);font-size:12px;font-weight:600}
 .cc98-channel-alert{margin-top:0}
 
-/* ============ 登录 / 配额 / 渠道 ============ */
-.cc98-login-hint{font-size:12px;color:var(--cc98-txt2);line-height:1.7;margin-bottom:14px;padding:11px 12px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd-soft);border-radius:var(--cc98-rad-sm)}
+/* ============ 配额 / 统一设置入口 ============ */
 .cc98-quota{display:inline-block;font-size:11px;padding:3px 10px;border-radius:11px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd);color:var(--cc98-txt2);margin-bottom:14px;font-weight:500}
 .cc98-quota.warn{background:var(--cc98-warn-bg);color:var(--cc98-warn);border-color:transparent}
-.cc98-channel{border:1px solid var(--cc98-bd);border-radius:var(--cc98-rad-sm);padding:13px;margin-bottom:12px;background:var(--cc98-bg)}
-.cc98-channel .ch-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-.cc98-channel .ch-title{font-size:13px;font-weight:650;color:var(--cc98-txt)}
-.cc98-channel-state{display:inline-flex;align-items:center;padding:3px 8px;border-radius:10px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd);color:var(--cc98-txt3);font-size:10px;font-weight:650}
-.cc98-channel-state.enabled{background:var(--cc98-ok-bg);border-color:transparent;color:var(--cc98-ok)}
-.cc98-channel-status{margin-top:10px;margin-bottom:0}
-.cc98-channel-status.ok{padding:8px 10px;border-radius:8px;background:var(--cc98-ok-bg);color:var(--cc98-ok);font-size:11px}
+.cc98-settings-intro{font-size:12px;line-height:1.7;color:var(--cc98-txt2);margin-bottom:13px}
+.cc98-settings-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cc98-settings-feature{min-width:0;padding:13px;border:1px solid var(--cc98-bd);border-top:3px solid var(--cc98-pri);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg)}
+.cc98-settings-feature .feature-name{font-size:13px;font-weight:700;color:var(--cc98-txt);margin-bottom:5px}
+.cc98-settings-feature .feature-desc{font-size:11px;line-height:1.55;color:var(--cc98-txt2);min-height:34px}
+.cc98-settings-feature .feature-status{font-size:10px;font-weight:650;color:var(--cc98-txt3);margin-top:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
+.cc98-settings-security{margin-bottom:13px}
+@media (max-width:420px){.cc98-settings-features{grid-template-columns:1fr}}
 
 /* ============ 防站方样式污染：文字色兜底 ============
    面板注入在 CC98 页面里，共享同一份层叠上下文。上面那些 .cc98-xxx 规则
@@ -338,14 +336,13 @@ const CSS = `
 #cc98-ai-panel .cc98-select,
 #cc98-ai-panel .cc98-textarea,
 #cc98-ai-panel .cc98-secondary,
-#cc98-ai-panel .cc98-setting-inline label,
 #cc98-ai-panel .cc98-progress-stage,
 #cc98-ai-panel .cc98-src,
 #cc98-ai-panel .cc98-src-title,
 #cc98-ai-panel .cc98-empty-title,
 #cc98-ai-panel .cc98-sub .tn,
 #cc98-ai-panel .cc98-notif .nt,
-#cc98-ai-panel .cc98-channel .ch-title{color:var(--cc98-txt)}
+#cc98-ai-panel .cc98-settings-feature .feature-name{color:var(--cc98-txt)}
 
 #cc98-ai-panel .cc98-panel-close,
 #cc98-ai-panel .cc98-tab,
@@ -354,9 +351,10 @@ const CSS = `
 #cc98-ai-panel .cc98-empty,
 #cc98-ai-panel .cc98-empty-sub,
 #cc98-ai-panel .cc98-loading,
-#cc98-ai-panel .cc98-login-hint,
 #cc98-ai-panel .cc98-quota,
-#cc98-ai-panel .cc98-sub .pause{color:var(--cc98-txt2)}
+#cc98-ai-panel .cc98-sub .pause,
+#cc98-ai-panel .cc98-settings-intro,
+#cc98-ai-panel .cc98-settings-feature .feature-desc{color:var(--cc98-txt2)}
 
 #cc98-ai-panel .cc98-chip,
 #cc98-ai-panel .cc98-keywords-label,
@@ -365,7 +363,8 @@ const CSS = `
 #cc98-ai-panel .cc98-result-meta,
 #cc98-ai-panel .cc98-sub .tm,
 #cc98-ai-panel .cc98-sub.paused .tn,
-#cc98-ai-panel .cc98-notif .nm{color:var(--cc98-txt3)}
+#cc98-ai-panel .cc98-notif .nm,
+#cc98-ai-panel .cc98-settings-feature .feature-status{color:var(--cc98-txt3)}
 
 #cc98-ai-panel .cc98-expression-meta,
 #cc98-ai-panel .cc98-expression-preview.neutral,
@@ -387,8 +386,7 @@ const CSS = `
 #cc98-ai-panel .cc98-chip.done{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-quota.warn{color:var(--cc98-warn)}
 #cc98-ai-panel .cc98-expression-preview.valid,
-#cc98-ai-panel .cc98-channel-state.enabled,
-#cc98-ai-panel .cc98-channel-status.ok{color:var(--cc98-ok)}
+#cc98-ai-panel .cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-error,
 #cc98-ai-panel .cc98-error-detail summary,
 #cc98-ai-panel .cc98-error-detail pre,

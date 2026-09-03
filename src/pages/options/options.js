@@ -1,7 +1,21 @@
 // ============================================================
-// 设置页：清晰的 LLM 连接配置 + 搜索范围
+// 统一设置页：并列管理 AI 搜索与订阅通知，两项功能互不依赖
 // ============================================================
-import { LLM_DEFAULTS, SEARCH_BUDGET_DEFAULTS, STORAGE_KEYS } from '../../shared/constants.js';
+import {
+  LLM_DEFAULTS,
+  MSG,
+  NOTIFY_INTERVAL_PRESETS,
+  SEARCH_BUDGET_DEFAULTS,
+  STORAGE_KEYS,
+} from '../../shared/constants.js';
+import {
+  getHealth,
+  listChannels,
+  saveChannel,
+  setChannelEnabled,
+  testChannel,
+} from '../../content/lib/backend-api.js';
+import { getEmail, isLoggedIn, logout, sendCode, verifyCode } from '../../content/lib/auth.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -30,6 +44,9 @@ const LLM_PRESETS = {
 
 let savedLLMSnapshot = '';
 let savedBudgetSnapshot = '';
+let watchChannels = [];
+let watchChannelsLoaded = false;
+const channelDirty = { dingtalk: false, email: false };
 
 function normalizeBaseUrl(value) {
   return String(value || '').trim().replace(/\/+$/, '');
@@ -130,6 +147,7 @@ async function load() {
   const stored = await chrome.storage.local.get([STORAGE_KEYS.LLM, STORAGE_KEYS.BUDGET]);
   fillLLM({ ...LLM_DEFAULTS, ...(stored[STORAGE_KEYS.LLM] || {}) });
   fillBudget({ ...SEARCH_BUDGET_DEFAULTS, ...(stored[STORAGE_KEYS.BUDGET] || {}) });
+  await loadWatchSettings();
 }
 
 async function ensureOriginPermission(baseUrl) {
@@ -229,6 +247,348 @@ async function resetBudget() {
   setStatus('budgetStatus', '已恢复默认');
 }
 
+function formatInterval(minutes) {
+  if (minutes % 1440 === 0) return `${minutes / 1440} 天`;
+  if (minutes % 60 === 0) return `${minutes / 60} 小时`;
+  return `${minutes} 分钟`;
+}
+
+function formatTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
+}
+
+function getChannel(provider) {
+  return watchChannels.find((channel) => channel.provider === provider) || null;
+}
+
+function renderChannelState(provider) {
+  const channel = getChannel(provider);
+  const state = $(provider === 'dingtalk' ? 'dingtalkState' : 'emailState');
+  const toggle = $(provider === 'dingtalk' ? 'toggleDingtalk' : 'toggleEmailChannel');
+
+  state.textContent = channel ? (channel.enabled ? '已启用' : '未启用') : '未配置';
+  state.classList.toggle('enabled', !!(channel && channel.enabled));
+  toggle.hidden = !channel;
+  if (channel) {
+    toggle.dataset.enabled = String(!channel.enabled);
+    toggle.textContent = channel.enabled ? '停用' : '启用';
+  }
+}
+
+function renderChannelRuntime(provider) {
+  const channel = getChannel(provider);
+  const runtime = $(provider === 'dingtalk' ? 'dingtalkRuntime' : 'emailRuntime');
+  runtime.className = 'runtime';
+  runtime.textContent = '';
+  if (!channel || !channel.last_dispatch_status) return;
+  if (channel.last_dispatch_status === 'failed') {
+    runtime.classList.add('error');
+    runtime.textContent = `最近一次发送失败：${channel.last_dispatch_error || '请检查渠道配置'}。失败批次不会自动补发。`;
+    return;
+  }
+  if (channel.last_sent_at) {
+    runtime.classList.add('ok');
+    runtime.textContent = `最近发送成功：${formatTime(channel.last_sent_at)}`;
+  }
+}
+
+function renderChannelForm(provider, { resetFields = true } = {}) {
+  const channel = getChannel(provider);
+  renderChannelState(provider);
+  renderChannelRuntime(provider);
+
+  const saveButton = $(provider === 'dingtalk' ? 'saveDingtalk' : 'saveEmailChannel');
+  saveButton.textContent = channel ? '保存修改' : '保存并启用';
+  if (!resetFields) return;
+
+  channelDirty[provider] = false;
+  if (provider === 'dingtalk') {
+    $('dingtalkWebhook').value = '';
+    $('dingtalkSecret').value = '';
+    const hasWebhook = !!(channel && channel.config && channel.config.webhook);
+    $('dingtalkWebhookHint').hidden = !hasWebhook;
+    $('dingtalkSecret').placeholder = channel && channel.has_secret
+      ? '已保存；保存时可留空，测试时需重填'
+      : 'SEC…';
+  } else {
+    $('notificationEmail').value = (channel && channel.config && channel.config.to)
+      || $('watchAccountEmail').textContent
+      || '';
+    $('emailSubjectPrefix').value = (channel && channel.config && channel.config.subject_prefix) || '';
+  }
+}
+
+function setWatchPanels(loggedIn) {
+  $('watchLoggedOut').hidden = loggedIn;
+  $('watchLoggedIn').hidden = !loggedIn;
+}
+
+async function loadWatchHealth() {
+  const status = $('watchBackendStatus');
+  status.classList.remove('error');
+  status.textContent = '正在检测 Watch 后端…';
+  try {
+    const health = await getHealth();
+    const scan = health && health.components && health.components.scan_interval_minutes;
+    status.textContent = `Watch 后端在线 · 扫描间隔 ${scan || '—'} 分钟`;
+  } catch (_) {
+    status.classList.add('error');
+    status.textContent = 'Watch 后端离线，请稍后重试。AI 搜索不受影响。';
+  }
+}
+
+async function loadWatchChannels() {
+  watchChannelsLoaded = false;
+  watchChannels = (await listChannels()) || [];
+  watchChannelsLoaded = true;
+  const stored = await chrome.storage.local.get(STORAGE_KEYS.NOTIFY_INTERVAL);
+  const ding = getChannel('dingtalk');
+  const mail = getChannel('email');
+  const interval = (ding && ding.notify_interval_minutes)
+    || (mail && mail.notify_interval_minutes)
+    || stored[STORAGE_KEYS.NOTIFY_INTERVAL]
+    || 60;
+  $('notifyInterval').value = String(interval);
+  renderChannelForm('dingtalk');
+  renderChannelForm('email');
+}
+
+async function loadWatchSettings() {
+  $('notifyInterval').innerHTML = NOTIFY_INTERVAL_PRESETS
+    .map((minutes) => `<option value="${minutes}">${formatInterval(minutes)}</option>`)
+    .join('');
+  loadWatchHealth();
+
+  const loggedIn = await isLoggedIn();
+  setWatchPanels(loggedIn);
+  if (!loggedIn) return;
+
+  $('watchAccountEmail').textContent = await getEmail();
+  try {
+    await loadWatchChannels();
+  } catch (error) {
+    if (!(await isLoggedIn())) {
+      setWatchPanels(false);
+      setStatus('watchLoginStatus', '登录已过期，请重新登录', 'error');
+      return;
+    }
+    setStatus('intervalStatus', error.message || '读取通知设置失败', 'error');
+  }
+}
+
+async function sendWatchLoginCode() {
+  const email = $('watchEmail').value.trim();
+  if (!/@zju\.edu\.cn$/i.test(email)) {
+    setStatus('watchLoginStatus', '请输入浙大邮箱', 'error');
+    return;
+  }
+  const button = $('sendWatchCode');
+  button.disabled = true;
+  button.textContent = '发送中…';
+  setStatus('watchLoginStatus', '');
+  try {
+    const response = await sendCode(email);
+    if (response && response.dev_code) {
+      await verifyCode(email, response.dev_code);
+      setStatus('watchLoginStatus', '已登录（测试模式）');
+      await loadWatchSettings();
+      return;
+    }
+    $('watchCodeStep').hidden = false;
+    setStatus('watchLoginStatus', '验证码已发送，请查收邮箱');
+    $('watchCode').focus();
+  } catch (error) {
+    setStatus('watchLoginStatus', error.message || '验证码发送失败', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = '发送验证码';
+  }
+}
+
+async function verifyWatchLoginCode() {
+  const email = $('watchEmail').value.trim();
+  const code = $('watchCode').value.trim();
+  if (!code) {
+    setStatus('watchLoginStatus', '请输入验证码', 'error');
+    return;
+  }
+  const button = $('verifyWatchCode');
+  button.disabled = true;
+  button.textContent = '验证中…';
+  try {
+    await verifyCode(email, code);
+    setStatus('watchLoginStatus', '登录成功');
+    await loadWatchSettings();
+  } catch (error) {
+    setStatus('watchLoginStatus', error.message || '验证失败', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = '验证并登录';
+  }
+}
+
+function readDingtalkConfig() {
+  const config = {};
+  const webhook = $('dingtalkWebhook').value.trim();
+  const secret = $('dingtalkSecret').value.trim();
+  if (webhook) config.webhook = webhook;
+  if (secret) config.secret = secret;
+  return config;
+}
+
+function readEmailConfig() {
+  return {
+    to: $('notificationEmail').value.trim(),
+    subject_prefix: $('emailSubjectPrefix').value.trim() || 'CC98 订阅提醒',
+  };
+}
+
+async function saveNotifyInterval() {
+  const button = $('saveNotifyInterval');
+  const interval = Number($('notifyInterval').value);
+  if (!watchChannelsLoaded) {
+    setStatus('intervalStatus', '通知渠道状态尚未加载，请稍后重试', 'error');
+    return;
+  }
+  button.disabled = true;
+  button.textContent = '保存中…';
+  try {
+    await chrome.storage.local.set({ [STORAGE_KEYS.NOTIFY_INTERVAL]: interval });
+    const channel = getChannel('dingtalk') || getChannel('email');
+    if (channel) {
+      await saveChannel({
+        provider: channel.provider,
+        enabled: channel.enabled,
+        notifyIntervalMinutes: interval,
+        config: undefined,
+      });
+      for (const item of watchChannels) item.notify_interval_minutes = interval;
+      setStatus('intervalStatus', '通知间隔已保存 ✓');
+    } else {
+      setStatus('intervalStatus', '已记住，将在首次保存渠道时生效', 'pending');
+    }
+  } catch (error) {
+    setStatus('intervalStatus', error.message || '保存失败', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = '保存通知间隔';
+  }
+}
+
+async function saveWatchChannel(provider) {
+  const current = getChannel(provider);
+  const config = provider === 'dingtalk' ? readDingtalkConfig() : readEmailConfig();
+  const statusId = provider === 'dingtalk' ? 'dingtalkStatus' : 'emailChannelStatus';
+  const button = $(provider === 'dingtalk' ? 'saveDingtalk' : 'saveEmailChannel');
+
+  if (!watchChannelsLoaded) {
+    setStatus(statusId, '通知渠道状态尚未加载，请稍后重试', 'error');
+    return;
+  }
+
+  if (provider === 'dingtalk' && !current && !config.webhook) {
+    setStatus(statusId, '请填写完整的 Webhook 地址', 'error');
+    return;
+  }
+  if (provider === 'email' && !config.to) {
+    setStatus(statusId, '请填写接收邮箱', 'error');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = '保存中…';
+  try {
+    const savedChannel = await saveChannel({
+      provider,
+      enabled: current ? current.enabled : true,
+      notifyIntervalMinutes: Number($('notifyInterval').value),
+      config,
+    });
+    await chrome.storage.local.set({
+      [STORAGE_KEYS.NOTIFY_INTERVAL]: Number($('notifyInterval').value),
+    });
+    const existingIndex = watchChannels.findIndex((item) => item.provider === provider);
+    if (existingIndex >= 0) watchChannels[existingIndex] = savedChannel;
+    else watchChannels.push(savedChannel);
+    for (const item of watchChannels) {
+      item.notify_interval_minutes = Number($('notifyInterval').value);
+    }
+    renderChannelForm(provider);
+    channelDirty[provider] = false;
+    setStatus(statusId, '渠道配置已保存 ✓');
+  } catch (error) {
+    setStatus(statusId, error.message || '保存失败', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = getChannel(provider) ? '保存修改' : '保存并启用';
+  }
+}
+
+async function testWatchChannel(provider) {
+  const current = getChannel(provider);
+  const config = provider === 'dingtalk' ? readDingtalkConfig() : readEmailConfig();
+  const statusId = provider === 'dingtalk' ? 'dingtalkStatus' : 'emailChannelStatus';
+  const button = $(provider === 'dingtalk' ? 'testDingtalk' : 'testEmailChannel');
+
+  if (provider === 'dingtalk' && !config.webhook) {
+    setStatus(statusId, '测试时请重新填写完整 Webhook', 'error');
+    return;
+  }
+  if (provider === 'dingtalk' && current && current.has_secret && !config.secret) {
+    setStatus(statusId, '该机器人使用加签，测试时请重新填写完整 Secret', 'error');
+    return;
+  }
+  if (provider === 'email' && !config.to) {
+    setStatus(statusId, '请填写接收邮箱', 'error');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = '发送中…';
+  try {
+    await testChannel({ provider, config });
+    setStatus(
+      statusId,
+      channelDirty[provider] ? '测试成功；当前修改尚未保存' : '测试消息已发送 ✓',
+      channelDirty[provider] ? 'pending' : 'ok',
+    );
+  } catch (error) {
+    setStatus(statusId, error.message || '发送失败', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = '发送测试（不保存）';
+  }
+}
+
+async function toggleWatchChannel(provider) {
+  const channel = getChannel(provider);
+  if (!channel) return;
+  const button = $(provider === 'dingtalk' ? 'toggleDingtalk' : 'toggleEmailChannel');
+  const statusId = provider === 'dingtalk' ? 'dingtalkStatus' : 'emailChannelStatus';
+  const enabled = !channel.enabled;
+  button.disabled = true;
+  button.textContent = enabled ? '启用中…' : '停用中…';
+  try {
+    await setChannelEnabled(provider, enabled);
+    channel.enabled = enabled;
+    renderChannelState(provider);
+    setStatus(
+      statusId,
+      channelDirty[provider]
+        ? `渠道已${enabled ? '启用' : '停用'}；表单修改尚未保存`
+        : `渠道已${enabled ? '启用' : '停用'} ✓`,
+      channelDirty[provider] ? 'pending' : 'ok',
+    );
+  } catch (error) {
+    setStatus(statusId, error.message || '操作失败', 'error');
+  } finally {
+    button.disabled = false;
+    renderChannelState(provider);
+  }
+}
+
 for (const id of ['keywordCount', 'searchLimitPerKeyword', 'topicLimit', 'maxRepliesPerTopic', 'maxCharsPerReply']) {
   $(id).addEventListener('input', () => {
     $(id + 'Val').textContent = $(id).value;
@@ -255,5 +615,45 @@ $('testLLM').addEventListener('click', testLLM);
 $('resetLLM').addEventListener('click', resetLLM);
 $('saveBudget').addEventListener('click', saveBudget);
 $('resetBudget').addEventListener('click', resetBudget);
+
+$('sendWatchCode').addEventListener('click', sendWatchLoginCode);
+$('verifyWatchCode').addEventListener('click', verifyWatchLoginCode);
+$('watchCode').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') verifyWatchLoginCode();
+});
+$('logoutWatch').addEventListener('click', async () => {
+  await logout();
+  watchChannels = [];
+  watchChannelsLoaded = false;
+  $('watchCodeStep').hidden = true;
+  $('watchCode').value = '';
+  setWatchPanels(false);
+  chrome.runtime.sendMessage({ type: MSG.SET_BADGE, count: 0 }).catch(() => {});
+  setStatus('watchLoginStatus', '已退出 Watch 登录');
+});
+$('saveNotifyInterval').addEventListener('click', saveNotifyInterval);
+$('notifyInterval').addEventListener('change', () => {
+  setStatus('intervalStatus', '有未保存修改', 'pending');
+});
+
+$('saveDingtalk').addEventListener('click', () => saveWatchChannel('dingtalk'));
+$('testDingtalk').addEventListener('click', () => testWatchChannel('dingtalk'));
+$('toggleDingtalk').addEventListener('click', () => toggleWatchChannel('dingtalk'));
+$('saveEmailChannel').addEventListener('click', () => saveWatchChannel('email'));
+$('testEmailChannel').addEventListener('click', () => testWatchChannel('email'));
+$('toggleEmailChannel').addEventListener('click', () => toggleWatchChannel('email'));
+
+for (const id of ['dingtalkWebhook', 'dingtalkSecret']) {
+  $(id).addEventListener('input', () => {
+    channelDirty.dingtalk = true;
+    setStatus('dingtalkStatus', '有未保存修改', 'pending');
+  });
+}
+for (const id of ['notificationEmail', 'emailSubjectPrefix']) {
+  $(id).addEventListener('input', () => {
+    channelDirty.email = true;
+    setStatus('emailChannelStatus', '有未保存修改', 'pending');
+  });
+}
 
 load().catch((error) => setStatus('llmStatus', `读取设置失败：${error.message || error}`, 'error'));
