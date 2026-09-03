@@ -73,18 +73,15 @@
     .status.error{color:var(--err)}
     .status.pending{color:var(--txt2)}
     .hint{font-size:12px;color:var(--txt2);line-height:1.65;margin-top:6px}
-    .account-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;margin-bottom:16px;border:1px solid var(--bd-soft);border-radius:9px;background:var(--bg);font-size:12px}
+    .account-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid var(--bd-soft);border-radius:9px;background:var(--bg);font-size:12px}
     .account-email{font-weight:650;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .channel{padding:14px;margin-top:14px;border:1px solid var(--bd);border-radius:11px;background:var(--card)}
-    .channel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
-    .channel-title{font-size:13px;font-weight:700;color:var(--txt)}
+    .channel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+    .channel-title{font-size:14px;font-weight:700;color:var(--txt)}
     .channel-state{padding:3px 8px;border:1px solid var(--bd);border-radius:11px;color:var(--txt3);background:var(--bg);font-size:10px;font-weight:700}
     .channel-state.enabled{color:var(--ok);border-color:transparent;background:color-mix(in srgb,var(--ok) 12%,transparent)}
     .runtime{font-size:11px;line-height:1.55;color:var(--txt3);margin-top:10px}
     .runtime.ok{color:var(--ok)}
     .runtime.error{padding:9px 10px;border:1px solid var(--err-bd);border-radius:8px;background:var(--err-bg);color:var(--err)}
-    .backend-status{margin-top:16px;padding:10px 12px;border:1px solid var(--bd-soft);border-radius:9px;background:var(--bg);font-size:11px;color:var(--txt2)}
-    .backend-status.error{border-color:var(--err-bd);background:var(--err-bg);color:var(--err)}
     [hidden]{display:none!important}
     @media (max-width:900px){.feature-grid,.security-grid{grid-template-columns:1fr}.feature-head{min-height:0}}
     @media (max-width:620px){.row{display:block}.wrap{padding:20px 14px 60px}.card{padding:18px}.feature-head{padding:16px}.actions .btn{flex:1}.account-bar{align-items:flex-start;flex-direction:column}}
@@ -219,8 +216,8 @@
         </div>
 
         <div class="card">
-          <h2>登录和接收方式</h2>
-          <div class="card-sub">使用浙大邮箱登录，然后选择多久提醒一次，以及用钉钉还是邮箱接收。</div>
+          <h2>浙大邮箱登录</h2>
+          <div class="card-sub">用于保存和管理你的订阅与接收方式。AI 搜索不需要登录。</div>
 
           <div id="watchLoggedOut">
             <div class="field">
@@ -247,7 +244,13 @@
               <div>登录邮箱：<span class="account-email" id="watchAccountEmail"></span></div>
               <button class="btn btn-ghost" id="logoutWatch" type="button">退出登录</button>
             </div>
+          </div>
+        </div>
 
+        <div id="watchSettings" hidden>
+          <div class="card">
+            <h2>提醒间隔</h2>
+            <div class="card-sub">选择符合订阅关键词的新帖攒多久后合并提醒。</div>
             <div class="field">
               <label for="notifyInterval">通知间隔（攒一批发）</label>
               <select id="notifyInterval"></select>
@@ -257,54 +260,54 @@
               <button class="btn btn-ghost" id="saveNotifyInterval" type="button">保存通知间隔</button>
               <span class="status" id="intervalStatus" aria-live="polite"></span>
             </div>
-
-            <div class="channel" data-provider="dingtalk">
-              <div class="channel-head">
-                <span class="channel-title">钉钉机器人</span>
-                <span class="channel-state" id="dingtalkState">未配置</span>
-              </div>
-              <div class="field">
-                <label for="dingtalkWebhook">Webhook 地址</label>
-                <input id="dingtalkWebhook" type="password" placeholder="https://oapi.dingtalk.com/robot/send?access_token=…" autocomplete="off" spellcheck="false" />
-                <div class="hint" id="dingtalkWebhookHint" hidden>Webhook 已保存在服务器上，页面不会完整显示。保存其他修改时可留空；发送测试时需要重新粘贴。</div>
-              </div>
-              <div class="field">
-                <label for="dingtalkSecret">加签 Secret</label>
-                <input id="dingtalkSecret" type="password" placeholder="SEC…" autocomplete="off" spellcheck="false" />
-              </div>
-              <div class="actions">
-                <button class="btn btn-primary" id="saveDingtalk" type="button">保存并启用</button>
-                <button class="btn btn-ghost" id="toggleDingtalk" type="button" hidden>停用</button>
-                <button class="btn btn-ghost" id="testDingtalk" type="button">发送测试（不保存）</button>
-                <span class="status" id="dingtalkStatus" aria-live="polite"></span>
-              </div>
-              <div class="runtime" id="dingtalkRuntime"></div>
-            </div>
-
-            <div class="channel" data-provider="email">
-              <div class="channel-head">
-                <span class="channel-title">邮箱通知</span>
-                <span class="channel-state" id="emailState">未配置</span>
-              </div>
-              <div class="field">
-                <label for="notificationEmail">接收邮箱</label>
-                <input id="notificationEmail" type="email" placeholder="student@zju.edu.cn" autocomplete="email" />
-              </div>
-              <div class="field">
-                <label for="emailSubjectPrefix">主题前缀</label>
-                <input id="emailSubjectPrefix" type="text" placeholder="CC98 订阅提醒" />
-              </div>
-              <div class="actions">
-                <button class="btn btn-primary" id="saveEmailChannel" type="button">保存并启用</button>
-                <button class="btn btn-ghost" id="toggleEmailChannel" type="button" hidden>停用</button>
-                <button class="btn btn-ghost" id="testEmailChannel" type="button">发送测试（不保存）</button>
-                <span class="status" id="emailChannelStatus" aria-live="polite"></span>
-              </div>
-              <div class="runtime" id="emailRuntime"></div>
-            </div>
           </div>
 
-          <div class="backend-status" id="watchBackendStatus">正在连接订阅提醒服务…</div>
+          <div class="card" data-provider="dingtalk">
+            <div class="channel-head">
+              <span class="channel-title">钉钉机器人</span>
+              <span class="channel-state" id="dingtalkState">未配置</span>
+            </div>
+            <div class="card-sub">通过钉钉群机器人接收提醒，可以单独启用或停用。</div>
+            <div class="field">
+              <label for="dingtalkWebhook">Webhook 地址</label>
+              <input id="dingtalkWebhook" type="password" placeholder="https://oapi.dingtalk.com/robot/send?access_token=…" autocomplete="off" spellcheck="false" />
+              <div class="hint" id="dingtalkWebhookHint" hidden>Webhook 已保存在服务器上，页面不会完整显示。保存其他修改时可留空；发送测试时需要重新粘贴。</div>
+            </div>
+            <div class="field">
+              <label for="dingtalkSecret">加签 Secret</label>
+              <input id="dingtalkSecret" type="password" placeholder="SEC…" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" id="saveDingtalk" type="button">保存并启用</button>
+              <button class="btn btn-ghost" id="toggleDingtalk" type="button" hidden>停用</button>
+              <button class="btn btn-ghost" id="testDingtalk" type="button">发送测试（不保存）</button>
+              <span class="status" id="dingtalkStatus" aria-live="polite"></span>
+            </div>
+            <div class="runtime" id="dingtalkRuntime"></div>
+          </div>
+
+          <div class="card" data-provider="email">
+            <div class="channel-head">
+              <span class="channel-title">邮箱通知</span>
+              <span class="channel-state" id="emailState">未配置</span>
+            </div>
+            <div class="card-sub">把提醒直接发送到指定邮箱，可以单独启用或停用。</div>
+            <div class="field">
+              <label for="notificationEmail">接收邮箱</label>
+              <input id="notificationEmail" type="email" placeholder="student@zju.edu.cn" autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="emailSubjectPrefix">主题前缀</label>
+              <input id="emailSubjectPrefix" type="text" placeholder="CC98 订阅提醒" />
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" id="saveEmailChannel" type="button">保存并启用</button>
+              <button class="btn btn-ghost" id="toggleEmailChannel" type="button" hidden>停用</button>
+              <button class="btn btn-ghost" id="testEmailChannel" type="button">发送测试（不保存）</button>
+              <span class="status" id="emailChannelStatus" aria-live="polite"></span>
+            </div>
+            <div class="runtime" id="emailRuntime"></div>
+          </div>
         </div>
       </section>
     </div>

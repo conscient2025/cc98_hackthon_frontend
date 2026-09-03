@@ -9,7 +9,6 @@ import {
   STORAGE_KEYS,
 } from '../../shared/constants.js';
 import {
-  getHealth,
   listChannels,
   saveChannel,
   setChannelEnabled,
@@ -285,7 +284,7 @@ function renderChannelRuntime(provider) {
   }
   if (channel.last_sent_at) {
     runtime.classList.add('ok');
-    runtime.textContent = `最近发送成功（北京时间）：${fmtBeijingDateTime(channel.last_sent_at)}`;
+    runtime.textContent = `最近发送成功：${fmtBeijingDateTime(channel.last_sent_at)}`;
   }
 }
 
@@ -318,20 +317,7 @@ function renderChannelForm(provider, { resetFields = true } = {}) {
 function setWatchPanels(loggedIn) {
   $('watchLoggedOut').hidden = loggedIn;
   $('watchLoggedIn').hidden = !loggedIn;
-}
-
-async function loadWatchHealth() {
-  const status = $('watchBackendStatus');
-  status.classList.remove('error');
-  status.textContent = '正在连接订阅提醒服务…';
-  try {
-    const health = await getHealth();
-    const scan = health && health.components && health.components.scan_interval_minutes;
-    status.textContent = `订阅提醒服务正常 · 每 ${scan || '—'} 分钟查看一次新帖`;
-  } catch (_) {
-    status.classList.add('error');
-    status.textContent = '订阅提醒服务暂时不可用，请稍后重试。AI 搜索仍然可以使用。';
-  }
+  $('watchSettings').hidden = !loggedIn;
 }
 
 async function loadWatchChannels() {
@@ -354,8 +340,6 @@ async function loadWatchSettings() {
   $('notifyInterval').innerHTML = NOTIFY_INTERVAL_PRESETS
     .map((minutes) => `<option value="${minutes}">${formatInterval(minutes)}</option>`)
     .join('');
-  loadWatchHealth();
-
   const loggedIn = await isLoggedIn();
   setWatchPanels(loggedIn);
   if (!loggedIn) return;
