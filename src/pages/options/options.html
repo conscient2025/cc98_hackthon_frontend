@@ -93,15 +93,15 @@
     <div class="sub">AI 搜索与订阅通知是两个并列、互不依赖的功能。你可以只配置其中一个，也可以同时使用。</div>
 
     <div class="security">
-      <div class="security-title">你的数据会去哪里</div>
+      <div class="security-title">安全声明</div>
       <div class="security-grid">
         <div class="security-item">
-          <strong>AI 搜索</strong>
-          AI 密钥只保存在当前浏览器中，只会发给你选择的 AI 服务。搜索时，插件会把需要总结的帖子内容发给该 AI 服务。请不要在公用电脑上保存密钥。
+          <strong>AI 搜索：只在你主动搜索时消耗 AI Token</strong>
+          只有点击“搜索”后，插件才会把你的问题和相关帖子内容发送给你选择的 AI 服务商，由其生成搜索关键词和总结，因此会消耗该账号的 AI Token。你的 AI 密钥只保存在当前浏览器中，不会发送给 CC98 或订阅提醒服务器。请勿在公用电脑上保存密钥。
         </div>
         <div class="security-item">
-          <strong>订阅通知</strong>
-          登录信息只保存在当前浏览器中；订阅关键词和接收方式会保存在订阅提醒服务器上。钉钉 Webhook 与 Secret 不会完整显示在页面上，服务器也不会收到你的 AI 密钥。
+          <strong>订阅通知：不消耗 AI Token</strong>
+          订阅通知不会调用 AI。服务器会自动查看 CC98 新帖，根据你设置的关键词进行匹配，再通过已启用的邮箱或钉钉发送提醒。你的浙大邮箱、订阅关键词和接收方式会保存在订阅提醒服务器上，仅用于登录、管理订阅和发送提醒；关闭网页、浏览器或电脑后，订阅仍会继续运行。
         </div>
       </div>
     </div>
@@ -210,7 +210,7 @@
           <div>
             <div class="feature-index">功能二</div>
             <h2 id="watchFeatureTitle">订阅通知</h2>
-            <p>服务器会定时查看新帖，命中订阅后发到你选择的接收方式。这个功能不需要 AI 密钥。</p>
+            <p>服务器会在后台定时查看新帖，命中订阅后发到你选择的接收方式。这个功能不需要 AI 密钥。</p>
           </div>
           <span class="feature-badge">可独立使用</span>
         </div>
