@@ -311,14 +311,18 @@ const CSS = `
 .cc98-quota{display:inline-block;font-size:11px;padding:3px 10px;border-radius:11px;background:var(--cc98-bg-sub);border:1px solid var(--cc98-bd);color:var(--cc98-txt2);margin-bottom:14px;font-weight:500}
 .cc98-quota.warn{background:var(--cc98-warn-bg);color:var(--cc98-warn);border-color:transparent}
 .cc98-settings-intro{font-size:12px;line-height:1.7;color:var(--cc98-txt2);margin-bottom:13px}
-.cc98-settings-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.cc98-settings-feature{min-width:0;padding:13px;border:1px solid var(--cc98-bd);border-top:3px solid var(--cc98-pri);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg)}
+.cc98-settings-features{display:grid;gap:10px;margin-bottom:12px}
+.cc98-settings-feature{min-width:0;padding:13px;border:1px solid var(--cc98-bd);border-left:3px solid var(--cc98-pri);border-radius:var(--cc98-rad-sm);background:var(--cc98-bg)}
 .cc98-settings-feature .feature-name{font-size:13px;font-weight:700;color:var(--cc98-txt);margin-bottom:5px}
-.cc98-settings-feature .feature-desc{font-size:11px;line-height:1.55;color:var(--cc98-txt2);min-height:34px}
-.cc98-settings-feature .feature-status{font-size:10px;font-weight:650;color:var(--cc98-txt3);margin-top:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
-.cc98-settings-security{margin-bottom:13px}
-@media (max-width:420px){.cc98-settings-features{grid-template-columns:1fr}}
+.cc98-settings-feature .feature-desc{font-size:12px;line-height:1.6;color:var(--cc98-txt2)}
+.cc98-settings-feature .feature-steps{display:grid;gap:6px;margin-top:9px}
+.cc98-settings-feature .feature-step{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.55;color:var(--cc98-txt2)}
+.cc98-settings-feature .step-no{display:flex;align-items:center;justify-content:center;flex:0 0 17px;width:17px;height:17px;margin-top:0;border-radius:50%;background:var(--cc98-pri-soft);color:var(--cc98-pri);font-size:10px;font-weight:700}
+.cc98-settings-feature .feature-note{font-size:11px;line-height:1.6;font-weight:600;color:var(--cc98-pri);background:var(--cc98-pri-soft);border-radius:7px;padding:7px 9px;margin-top:9px}
+.cc98-settings-actions{margin-bottom:0}
+.cc98-settings-actions .cc98-primary{width:100%}
+.cc98-settings-feedback{font-size:11px;line-height:1.6;color:var(--cc98-err);background:var(--cc98-err-bg);border:1px solid var(--cc98-err-bd);border-radius:var(--cc98-rad-sm);padding:9px 11px;margin-top:10px}
+.cc98-settings-feedback[hidden]{display:none}
 
 /* ============ 防站方样式污染：文字色兜底 ============
    面板注入在 CC98 页面里，共享同一份层叠上下文。上面那些 .cc98-xxx 规则
@@ -354,7 +358,8 @@ const CSS = `
 #cc98-ai-panel .cc98-quota,
 #cc98-ai-panel .cc98-sub .pause,
 #cc98-ai-panel .cc98-settings-intro,
-#cc98-ai-panel .cc98-settings-feature .feature-desc{color:var(--cc98-txt2)}
+#cc98-ai-panel .cc98-settings-feature .feature-desc,
+#cc98-ai-panel .cc98-settings-feature .feature-step{color:var(--cc98-txt2)}
 
 #cc98-ai-panel .cc98-chip,
 #cc98-ai-panel .cc98-keywords-label,
@@ -363,8 +368,7 @@ const CSS = `
 #cc98-ai-panel .cc98-result-meta,
 #cc98-ai-panel .cc98-sub .tm,
 #cc98-ai-panel .cc98-sub.paused .tn,
-#cc98-ai-panel .cc98-notif .nm,
-#cc98-ai-panel .cc98-settings-feature .feature-status{color:var(--cc98-txt3)}
+#cc98-ai-panel .cc98-notif .nm{color:var(--cc98-txt3)}
 
 #cc98-ai-panel .cc98-expression-meta,
 #cc98-ai-panel .cc98-expression-preview.neutral,
@@ -377,6 +381,8 @@ const CSS = `
 #cc98-ai-panel .cc98-src-idx,
 #cc98-ai-panel .cc98-src:hover .cc98-src-title,
 #cc98-ai-panel .cc98-notif .nt a,
+#cc98-ai-panel .cc98-settings-feature .step-no,
+#cc98-ai-panel .cc98-settings-feature .feature-note,
 #cc98-ai-panel .cc98-secondary:hover:not(:disabled){color:var(--cc98-pri)}
 
 #cc98-ai-panel .cc98-btn-primary,
@@ -385,13 +391,13 @@ const CSS = `
 
 #cc98-ai-panel .cc98-chip.done{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-quota.warn{color:var(--cc98-warn)}
-#cc98-ai-panel .cc98-expression-preview.valid,
-#cc98-ai-panel .cc98-settings-feature .feature-status.ready{color:var(--cc98-ok)}
+#cc98-ai-panel .cc98-expression-preview.valid{color:var(--cc98-ok)}
 #cc98-ai-panel .cc98-error,
 #cc98-ai-panel .cc98-error-detail summary,
 #cc98-ai-panel .cc98-error-detail pre,
 #cc98-ai-panel .cc98-sub .del,
-#cc98-ai-panel .cc98-expression-preview.invalid{color:var(--cc98-err)}
+#cc98-ai-panel .cc98-expression-preview.invalid,
+#cc98-ai-panel .cc98-settings-feedback{color:var(--cc98-err)}
 
 /* 输入框背景也要钉：站方给 input 设了浅底会和我们的浅字撞成白底白字 */
 #cc98-ai-panel .cc98-input,
