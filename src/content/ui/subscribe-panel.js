@@ -54,7 +54,7 @@ async function draw(body) {
       <label for="cc98-sub-expression">订阅关键词</label>
       <div class="cc98-form-row" style="margin-bottom:8px">
         <input id="cc98-sub-expression" class="cc98-input" type="text"
-               placeholder="例如：C++ 后端/服务端 实习" ${reachedLimit ? 'disabled' : ''} />
+               placeholder="例如：微积分/vjf 小测" ${reachedLimit ? 'disabled' : ''} />
         <button id="cc98-sub-add" class="cc98-btn-primary" type="button" disabled>添加订阅</button>
       </div>
       <div class="cc98-expression-meta">
