@@ -14,7 +14,6 @@ CC98 AI+ 沿着这条信息流向两个方向工作：
 
 ![CC98 AI+ 在 CC98 页面中的搜索界面](docs/images/cc98-ai-search-overview.png)
 
----
 
 ## AI 搜索
 
@@ -34,7 +33,6 @@ AI 搜索支持：
 
 完整搜索流程运行在浏览器扩展中，不依赖 CC98 AI+ 后端。
 
----
 
 ## 订阅提醒
 
@@ -55,7 +53,6 @@ CC98 AI+ 后端持续扫描全站新帖，发现符合订阅条件的帖子后�
 
 钉钉提醒需要**用户自行配置钉钉群机器人**。操作说明见[钉钉官方文档](https://open.dingtalk.com/document/dingstart/custom-bot-creation-and-installation)。CC98 AI+ 当前仅支持「加签」安全设置，填写 Webhook 与对应的加签密钥即可。
 
----
 
 ## 安装
 
@@ -84,7 +81,6 @@ cd cc98_hackthon_frontend
 
 随后在浏览器扩展管理页面开启「开发者模式」，选择「加载已解压的扩展程序」，加载仓库根目录即可。
 
----
 
 ## Security & Privacy
 
@@ -97,7 +93,6 @@ cd cc98_hackthon_frontend
 
 用户自己的 **CC98 Token 和 LLM API Key 都不会上传到 CC98 AI+ 后端**。
 
----
 
 ## 对 CC98 服务资源保持克制
 
@@ -109,14 +104,11 @@ AI 搜索会增加自动化 API 请求，因此我们主动限制一次搜索的
 
 我们希望在改善使用体验的同时，也尽量减少对 CC98 公共服务资源的额外负担。
 
----
 
 ## 后端
 
 订阅提醒由独立后端服务支持：
 
-[CC98 AI+ Backend](https://github.com/conscient2025/cc98-ai-improvement-backend)
-
----
+[CC98 AI+ Backend](https://github.com/firefelixfu026/cc98-ai-improvement-backend)
 
 CC98 AI+ 是第三方浏览器增强项目，与 CC98 官方无隶属关系。使用本项目时，请遵守 CC98 的相关规则，并合理使用论坛提供的服务资源。
