@@ -56,7 +56,7 @@ export function renderSearchPanel(body) {
   body.innerHTML = `
     <div class="cc98-form-row">
       <input id="cc98-search-input" class="cc98-input" type="text"
-             placeholder="输入想了解的话题，如：竺院 保研" />
+             placeholder="用自然语言提问，AI 会自动提取关键词并搜索" />
       <button id="cc98-search-btn" class="cc98-btn-primary" type="button">搜索</button>
       <button id="cc98-search-stop" class="cc98-secondary" type="button" hidden>停止</button>
     </div>
